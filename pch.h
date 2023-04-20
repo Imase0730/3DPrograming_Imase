@@ -90,4 +90,3 @@ namespace DX
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "CommonStates.h"
-#include "SpriteBatch.h"

@@ -191,6 +191,7 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="ImaseLib\DebugFont.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp">
@@ -199,15 +200,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Scene\SpriteSampleScene.cpp" />
+    <ClCompile Include="Scene\SpriteSampleScene.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="directx.ico" />
-    <Image Include="Scene\Textures\cat.png" />
-    <Image Include="Scene\Textures\robot.png" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest" />

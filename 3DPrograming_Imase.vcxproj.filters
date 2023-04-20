@@ -14,9 +14,6 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{977c7774-2208-4aba-8187-d5842ccf5447}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scene\Textures">
-      <UniqueIdentifier>{8e1c3f0b-eb65-4eea-9c7d-1733bb0e3803}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -57,12 +54,6 @@
   <ItemGroup>
     <Image Include="directx.ico">
       <Filter>Assets</Filter>
-    </Image>
-    <Image Include="Scene\Textures\cat.png">
-      <Filter>Scene\Textures</Filter>
-    </Image>
-    <Image Include="Scene\Textures\robot.png">
-      <Filter>Scene\Textures</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
