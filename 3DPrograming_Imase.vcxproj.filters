@@ -14,6 +14,9 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{977c7774-2208-4aba-8187-d5842ccf5447}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Textures">
+      <UniqueIdentifier>{5e7f7cf7-1566-432f-9f8e-14d1bcfce6bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -63,5 +66,22 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ImageContentTask Include="Textures\card_heart_01.png">
+      <Filter>Textures</Filter>
+    </ImageContentTask>
+    <ImageContentTask Include="Textures\card_heart_02.png">
+      <Filter>Textures</Filter>
+    </ImageContentTask>
+    <ImageContentTask Include="Textures\card_heart_03.png">
+      <Filter>Textures</Filter>
+    </ImageContentTask>
+    <ImageContentTask Include="Textures\cat.png">
+      <Filter>Textures</Filter>
+    </ImageContentTask>
+    <ImageContentTask Include="Textures\robot.png">
+      <Filter>Textures</Filter>
+    </ImageContentTask>
   </ItemGroup>
 </Project>

@@ -17,8 +17,7 @@ using namespace DirectX;
 #define WS_MY_WINDOW (WS_OVERLAPPED     | \
                       WS_CAPTION        | \
                       WS_SYSMENU        | \
-                      WS_MINIMIZEBOX    | \
-                      WS_MAXIMIZEBOX)
+                      WS_MINIMIZEBOX)
 
 namespace
 {
@@ -52,15 +51,15 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     static bool s_fullscreen = false;
 
-    // 画面モード選択
-    if (MessageBox(NULL, L"フルスクリーンにしますか？", L"画面モード設定", MB_YESNO) == IDYES)
-    {
-        s_fullscreen = true;
-    }
-    else
-    {
-        s_fullscreen = false;
-    }
+    //// 画面モード選択
+    //if (MessageBox(NULL, L"フルスクリーンにしますか？", L"画面モード設定", MB_YESNO) == IDYES)
+    //{
+    //    s_fullscreen = true;
+    //}
+    //else
+    //{
+    //    s_fullscreen = false;
+    //}
 
     // キーボードの作成
     std::unique_ptr<Keyboard> keyboard;

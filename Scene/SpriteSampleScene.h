@@ -28,5 +28,13 @@ public:
 	// デバイスロストした時に呼び出される関数
 	void OnDeviceLost() override;
 
+private:
+
+	// スプライトバッチへのポインタ
+	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+
+	// 猫の絵のテクスチャハンドル
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catSRV;
+
 };
 
