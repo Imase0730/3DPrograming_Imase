@@ -279,7 +279,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
     if (m_swapChain)
     {
         UINT flags = (m_options & c_AllowTearing) ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u;
-        flags |= DXGI_MODE_SCALING_STRETCHED;
+        flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
         // If the swap chain already exists, resize it.
         HRESULT hr = m_swapChain->ResizeBuffers(
@@ -326,7 +326,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
         swapChainDesc.SwapEffect = (m_options & (c_FlipPresent | c_AllowTearing | c_EnableHDR)) ? DXGI_SWAP_EFFECT_FLIP_DISCARD : DXGI_SWAP_EFFECT_DISCARD;
         swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
         swapChainDesc.Flags = (m_options & c_AllowTearing) ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u;
-        swapChainDesc.Flags |= DXGI_MODE_SCALING_STRETCHED;
+        swapChainDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
         DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsSwapChainDesc = {};
         fsSwapChainDesc.Windowed = TRUE;
