@@ -210,6 +210,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Scene\SpriteSampleScene.h" />
     <ClInclude Include="StepTimer.h" />
+    <ClInclude Include="UserResources.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceResources.cpp" />

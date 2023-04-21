@@ -36,6 +36,7 @@
     <ClInclude Include="Scene\SpriteSampleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="UserResources.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
