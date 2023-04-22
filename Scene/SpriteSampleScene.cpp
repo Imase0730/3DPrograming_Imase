@@ -29,7 +29,7 @@ void SpriteSampleScene::Render()
 
 void SpriteSampleScene::Finalize()
 {
-	m_catSRV.Get();
+	m_catSRV.Reset();
 	m_spriteBatch.reset();
 }
 

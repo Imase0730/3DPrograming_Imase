@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ImaseLib/SceneManager.h"
+#include "../ImaseLib/SceneManager.h"
 #include "../UserResources.h"
 
 class SpriteSampleScene : public Imase::Scene<UserResources>
