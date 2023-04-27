@@ -66,9 +66,6 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ImageContentTask Include="Textures\card_heart_01.png">
       <Filter>Textures</Filter>
     </ImageContentTask>
@@ -84,5 +81,8 @@
     <ImageContentTask Include="Textures\robot.png">
       <Filter>Textures</Filter>
     </ImageContentTask>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

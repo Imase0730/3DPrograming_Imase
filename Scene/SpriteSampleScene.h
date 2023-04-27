@@ -6,6 +6,9 @@
 class SpriteSampleScene : public Imase::Scene<UserResources>
 {
 public:
+	
+	// コンストラクタ
+	SpriteSampleScene();
 
 	// 初期化
 	void Initialize() override;
@@ -35,6 +38,21 @@ private:
 
 	// 猫の絵のテクスチャハンドル
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_catSRV;
+
+	// ロボットの絵のテクスチャハンドル
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_robotSRV;
+
+	// ばね係数
+	static const float K;
+
+	// 摩擦係数
+	static const float FRICTION;
+
+	// ロボットの絵のスケール
+	float m_robotScale;
+
+	// ロボットの絵のスケールの速度
+	float m_robotVelocity;
 
 };
 
