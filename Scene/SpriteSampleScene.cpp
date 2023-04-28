@@ -1,5 +1,6 @@
 #include "../pch.h"
 #include "SpriteSampleScene.h"
+#include "../Task/Number.h"
 
 using namespace DirectX;
 
@@ -19,6 +20,9 @@ void SpriteSampleScene::Initialize()
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
+
+	// 数字を表示するタスクを登録する
+	m_taskManager.AddTask<Number>();
 }
 
 void SpriteSampleScene::Update(float elapsedTime)
@@ -42,6 +46,8 @@ void SpriteSampleScene::Update(float elapsedTime)
 		m_robotScale += m_robotVelocity;
 	}
 
+	// タスクの更新
+	m_taskManager.Update(elapsedTime);
 }
 
 void SpriteSampleScene::Render()
@@ -50,6 +56,18 @@ void SpriteSampleScene::Render()
 	debugFont->AddString(L"SpriteSampleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
 
 	m_spriteBatch->Begin();
+
+	// カードの絵を描画する
+	m_spriteBatch->Draw(
+		m_cardSRV[0].Get(),
+		SimpleMath::Vector2(0.0f, 0.0f),
+		nullptr,
+		Colors::White,
+		0.0f,
+		SimpleMath::Vector2(0.0f, 0.0f),
+		1.0f,
+		SpriteEffects_None, 0.0f
+	);
 
 	// 猫の絵を描画する
 	m_spriteBatch->Draw(m_catSRV.Get(), SimpleMath::Vector2(0.0f, 0.0f));
@@ -65,6 +83,9 @@ void SpriteSampleScene::Render()
 		SimpleMath::Vector2(64.0f, 64.0f),
 		m_robotScale
 	);
+
+	// タスクの描画
+	m_taskManager.Render();
 
 	m_spriteBatch->End();
 }
@@ -92,6 +113,17 @@ void SpriteSampleScene::CreateDeviceDependentResources()
 	// ロボットの絵の読み込み
 	DX::ThrowIfFailed(
 		CreateDDSTextureFromFile(device, L"Resources/Textures/robot.dds", nullptr, m_robotSRV.ReleaseAndGetAddressOf())
+	);
+
+	// カードの絵の読み込み
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_01.dds", nullptr, m_cardSRV[0].ReleaseAndGetAddressOf())
+	);
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_02.dds", nullptr, m_cardSRV[1].ReleaseAndGetAddressOf())
+	);
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_03.dds", nullptr, m_cardSRV[2].ReleaseAndGetAddressOf())
 	);
 }
 

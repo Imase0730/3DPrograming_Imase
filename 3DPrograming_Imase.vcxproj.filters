@@ -17,6 +17,9 @@
     <Filter Include="Textures">
       <UniqueIdentifier>{5e7f7cf7-1566-432f-9f8e-14d1bcfce6bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Task">
+      <UniqueIdentifier>{71066c12-e8da-49cc-9275-6fb28beebad4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -37,6 +40,12 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="UserResources.h" />
+    <ClInclude Include="ImaseLib\TaskManager.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Task\Number.h">
+      <Filter>Task</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -50,6 +59,12 @@
     </ClCompile>
     <ClCompile Include="Scene\SpriteSampleScene.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ImaseLib\TaskManager.cpp">
+      <Filter>ImaseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Task\Number.cpp">
+      <Filter>Task</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

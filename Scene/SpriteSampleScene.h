@@ -2,6 +2,7 @@
 
 #include "../ImaseLib/SceneManager.h"
 #include "../UserResources.h"
+#include "../ImaseLib/TaskManager.h"
 
 class SpriteSampleScene : public Imase::Scene<UserResources>
 {
@@ -42,6 +43,9 @@ private:
 	// ロボットの絵のテクスチャハンドル
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_robotSRV;
 
+	// カードの絵のテクスチャハンドル
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_cardSRV[3];
+
 	// ばね係数
 	static const float K;
 
@@ -53,6 +57,9 @@ private:
 
 	// ロボットの絵のスケールの速度
 	float m_robotVelocity;
+
+	// タスクマネージャー
+	Imase::TaskManager m_taskManager;
 
 };
 
