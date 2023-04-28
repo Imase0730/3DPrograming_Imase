@@ -11,7 +11,7 @@ Number::~Number()
 
 bool Number::Update(float elapsedTime)
 {
-	return false;
+	return true;
 }
 
 void Number::Render()
