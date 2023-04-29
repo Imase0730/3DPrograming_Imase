@@ -1,0 +1,20 @@
+#
+# Sprite sheet data for MonoGame.
+#
+# To learn how to import these sprites into your MonoGame project visit:
+# https://www.codeandweb.com/texturepacker/monogame
+#
+# Sprite sheet: number.png (160 x 32)
+# $TexturePacker:SmartUpdate:05b069c1f0f8f7f86e8b908261d2d6fd:b406ed33b74a0026f0ae9363991c2bc1:56881b03ef16fcc020eef4868b43c63f$
+#
+
+number_b_0;0;0;0;16;32;16;32;0.5;0.5
+number_b_1;0;16;0;16;32;16;32;0.5;0.5
+number_b_2;0;32;0;16;32;16;32;0.5;0.5
+number_b_3;0;48;0;16;32;16;32;0.5;0.5
+number_b_4;0;64;0;16;32;16;32;0.5;0.5
+number_b_5;0;80;0;16;32;16;32;0.5;0.5
+number_b_6;0;96;0;16;32;16;32;0.5;0.5
+number_b_7;0;112;0;16;32;16;32;0.5;0.5
+number_b_8;0;128;0;16;32;16;32;0.5;0.5
+number_b_9;0;144;0;16;32;16;32;0.5;0.5

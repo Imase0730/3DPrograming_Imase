@@ -4,6 +4,7 @@
 #include "../UserResources.h"
 #include "../ImaseLib/TaskManager.h"
 #include "../ImaseLib/ResourceManager.h"
+#include "../Task/Number.h"
 
 class SpriteSampleScene : public Imase::Scene<UserResources>
 {
@@ -47,6 +48,9 @@ private:
 	// カードの絵のテクスチャハンドル
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_cardSRV[3];
 
+	// 数字の絵のテクスチャハンドル
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_numberSRV;
+
 	// ばね係数
 	static const float K;
 
@@ -64,6 +68,9 @@ private:
 
 	// リソースマネージャー
 	Imase::ResourceManager m_resourceManager;
+
+	// 数字を表示するタスクへのポインタ
+	Number* m_number;
 
 };
 

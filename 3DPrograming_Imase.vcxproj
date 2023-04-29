@@ -212,6 +212,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="ReadData.h" />
     <ClInclude Include="Scene\SpriteSampleScene.h" />
+    <ClInclude Include="SpriteSheet.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="Task\Number.h" />
     <ClInclude Include="UserResources.h" />

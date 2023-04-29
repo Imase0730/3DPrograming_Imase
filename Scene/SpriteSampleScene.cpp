@@ -1,6 +1,5 @@
 #include "../pch.h"
 #include "SpriteSampleScene.h"
-#include "../Task/Number.h"
 
 using namespace DirectX;
 
@@ -13,6 +12,7 @@ const float SpriteSampleScene::FRICTION = 0.97f;
 SpriteSampleScene::SpriteSampleScene()
 	: m_robotScale(1.0f)
 	, m_robotVelocity(0.0f)
+	, m_number(nullptr)
 {
 }
 
@@ -22,7 +22,9 @@ void SpriteSampleScene::Initialize()
 	CreateWindowSizeDependentResources();
 
 	// 数字を表示するタスクを登録する
-	m_taskManager.AddTask<Number>();
+	m_number = m_taskManager.AddTask<Number>(&m_spriteBatch, m_numberSRV.GetAddressOf());
+	m_number->SetNumber(12345678);
+	m_number->SetPosition(SimpleMath::Vector2(400.0f, 300.0f));
 }
 
 void SpriteSampleScene::Update(float elapsedTime)
@@ -92,6 +94,8 @@ void SpriteSampleScene::Render()
 
 void SpriteSampleScene::Finalize()
 {
+	m_numberSRV.Reset();
+	m_cardSRV[0].Reset();
 	m_robotSRV.Reset();
 	m_catSRV.Reset();
 	m_spriteBatch.reset();
@@ -113,6 +117,11 @@ void SpriteSampleScene::CreateDeviceDependentResources()
 	// ロボットの絵の読み込み
 	DX::ThrowIfFailed(
 		CreateDDSTextureFromFile(device, L"Resources/Textures/robot.dds", nullptr, m_robotSRV.ReleaseAndGetAddressOf())
+	);
+
+	// 数字の絵の読み込み
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(device, L"Resources/Textures/number.dds", nullptr, m_numberSRV.ReleaseAndGetAddressOf())
 	);
 
 	// カードの絵の読み込み

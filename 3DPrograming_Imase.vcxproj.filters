@@ -52,6 +52,9 @@
     <ClInclude Include="ReadData.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="SpriteSheet.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
