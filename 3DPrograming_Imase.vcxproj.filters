@@ -46,6 +46,12 @@
     <ClInclude Include="Task\Number.h">
       <Filter>Task</Filter>
     </ClInclude>
+    <ClInclude Include="ImaseLib\ResourceManager.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadData.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -65,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="Task\Number.cpp">
       <Filter>Task</Filter>
+    </ClCompile>
+    <ClCompile Include="ImaseLib\ResourceManager.cpp">
+      <Filter>ImaseLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

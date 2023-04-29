@@ -206,9 +206,11 @@
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="ImaseLib\DebugFont.h" />
+    <ClInclude Include="ImaseLib\ResourceManager.h" />
     <ClInclude Include="ImaseLib\SceneManager.h" />
     <ClInclude Include="ImaseLib\TaskManager.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ReadData.h" />
     <ClInclude Include="Scene\SpriteSampleScene.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="Task\Number.h" />
@@ -220,6 +222,9 @@
     <ClCompile Include="ImaseLib\DebugFont.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="ImaseLib\ResourceManager.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="ImaseLib\TaskManager.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../pch.h</PrecompiledHeaderFile>

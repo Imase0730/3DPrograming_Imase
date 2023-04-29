@@ -116,15 +116,29 @@ void SpriteSampleScene::CreateDeviceDependentResources()
 	);
 
 	// カードの絵の読み込み
+	//DX::ThrowIfFailed(
+	//	CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_01.dds", nullptr, m_cardSRV[0].ReleaseAndGetAddressOf())
+	//);
+	//DX::ThrowIfFailed(
+	//	CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_02.dds", nullptr, m_cardSRV[1].ReleaseAndGetAddressOf())
+	//);
+	//DX::ThrowIfFailed(
+	//	CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_03.dds", nullptr, m_cardSRV[2].ReleaseAndGetAddressOf())
+	//);
+
+	// カードの絵の読み込み
+	const wchar_t* TEXTURE_NAME = L"Resources/Textures/card_heart_01.dds";
+	m_resourceManager.LoadData(TEXTURE_NAME);
 	DX::ThrowIfFailed(
-		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_01.dds", nullptr, m_cardSRV[0].ReleaseAndGetAddressOf())
+		CreateDDSTextureFromMemory(
+			device,
+			m_resourceManager.GetData(TEXTURE_NAME).data(),
+			m_resourceManager.GetData(TEXTURE_NAME).size(),
+			nullptr,
+			m_cardSRV[0].ReleaseAndGetAddressOf()	// <--- リソースを管理するならSRVを管理した方が良い
+		)
 	);
-	DX::ThrowIfFailed(
-		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_02.dds", nullptr, m_cardSRV[1].ReleaseAndGetAddressOf())
-	);
-	DX::ThrowIfFailed(
-		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_03.dds", nullptr, m_cardSRV[2].ReleaseAndGetAddressOf())
-	);
+	m_resourceManager.DeleteData(TEXTURE_NAME);	// < --- 読み込んだテクスチャデータは破棄してもOK
 }
 
 void SpriteSampleScene::CreateWindowSizeDependentResources()

@@ -3,6 +3,7 @@
 #include "../ImaseLib/SceneManager.h"
 #include "../UserResources.h"
 #include "../ImaseLib/TaskManager.h"
+#include "../ImaseLib/ResourceManager.h"
 
 class SpriteSampleScene : public Imase::Scene<UserResources>
 {
@@ -60,6 +61,9 @@ private:
 
 	// タスクマネージャー
 	Imase::TaskManager m_taskManager;
+
+	// リソースマネージャー
+	Imase::ResourceManager m_resourceManager;
 
 };
 
