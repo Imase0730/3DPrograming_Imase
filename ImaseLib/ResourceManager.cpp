@@ -21,7 +21,7 @@ bool ResourceManager::LoadData(const wchar_t* name)
     return true;
 }
 
-bool ResourceManager::DeleteData(const wchar_t* name)
+bool ResourceManager::ReleaseData(const wchar_t* name)
 {
     if (!m_list.count(name)) return false;
 

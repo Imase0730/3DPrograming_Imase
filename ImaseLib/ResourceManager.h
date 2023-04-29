@@ -26,8 +26,8 @@ namespace Imase
 		// データのロード
 		bool LoadData(const wchar_t* name);
 
-		// データの削除
-		bool DeleteData(const wchar_t* name);
+		// データの解放
+		bool ReleaseData(const wchar_t* name);
 
 		// データの取得
 		std::vector<uint8_t> GetData(const wchar_t* name);

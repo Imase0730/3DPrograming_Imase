@@ -138,7 +138,7 @@ void SpriteSampleScene::CreateDeviceDependentResources()
 			m_cardSRV[0].ReleaseAndGetAddressOf()	// <--- リソースを管理するならSRVを管理した方が良い
 		)
 	);
-	m_resourceManager.DeleteData(TEXTURE_NAME);	// < --- 読み込んだテクスチャデータは破棄してもOK
+	m_resourceManager.ReleaseData(TEXTURE_NAME);	// < --- 読み込んだテクスチャデータは破棄してもOK
 }
 
 void SpriteSampleScene::CreateWindowSizeDependentResources()
