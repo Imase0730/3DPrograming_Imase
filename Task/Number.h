@@ -16,9 +16,6 @@ public:
 		float scale = 1.0f
 	);
 
-	// デストラクタ
-	~Number();
-
 	// 更新
 	bool Update(float elapsedTime) override;
 

@@ -30,10 +30,6 @@ Number::Number(
 	}
 }
 
-Number::~Number()
-{
-}
-
 bool Number::Update(float elapsedTime)
 {
 	UNREFERENCED_PARAMETER(elapsedTime);
@@ -47,7 +43,6 @@ void Number::Render()
 
 	// 数字のテクスチャの幅と高さを取得する
 	float w = m_frame[0]->size.x;
-	float h = m_frame[0]->size.y;
 
 	// 数字のセンターを左上へ補正する（無料版のtexturePacker対応のため）
 	pos.x += m_frame[0]->origin.x * m_scale;
