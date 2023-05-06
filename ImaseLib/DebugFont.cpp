@@ -6,7 +6,7 @@
 // Date: 2023.3.13
 // Author: Hideyasu Imase
 //--------------------------------------------------------------------------------------
-#include "../pch.h"
+#include "pch.h"
 #include "DebugFont.h"
 #include "DirectXHelpers.h"
 #include "VertexTypes.h"

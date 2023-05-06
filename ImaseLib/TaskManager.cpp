@@ -6,7 +6,7 @@
 // Date: 2023.3.20
 // Author: Hideyasu Imase
 //--------------------------------------------------------------------------------------
-#include "../pch.h"
+#include "pch.h"
 #include "TaskManager.h"
 
 using namespace Imase;

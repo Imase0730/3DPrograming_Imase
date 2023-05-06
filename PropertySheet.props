@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <dds>Resources\Textures\</dds>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ImageContentTask>
+      <Compress>BC3_UNORM</Compress>
+    </ImageContentTask>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ImageContentTask>
+      <GeneratePremultipliedAlpha>true</GeneratePremultipliedAlpha>
+    </ImageContentTask>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ImageContentTask>
+      <GenerateMips>false</GenerateMips>
+    </ImageContentTask>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ImageContentTask>
+      <ContentOutput>$(dds)%(Filename).dds</ContentOutput>
+    </ImageContentTask>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="dds">
+      <Value>$(dds)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

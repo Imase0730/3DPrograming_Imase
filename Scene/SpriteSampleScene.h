@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ImaseLib/SceneManager.h"
-#include "../UserResources.h"
-#include "../ImaseLib/TaskManager.h"
-#include "../ImaseLib/ResourceManager.h"
-#include "../Task/Number.h"
+#include "ImaseLib/SceneManager.h"
+#include "UserResources.h"
+#include "ImaseLib/TaskManager.h"
+#include "ImaseLib/ResourceManager.h"
+#include "Task/Number.h"
 
 class SpriteSampleScene : public Imase::Scene<UserResources>
 {

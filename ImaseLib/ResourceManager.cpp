@@ -6,9 +6,9 @@
 // Date: 2023.4.27
 // Author: Hideyasu Imase
 //--------------------------------------------------------------------------------------
-#include "../pch.h"
+#include "pch.h"
 #include "ResourceManager.h"
-#include "../ReadData.h"
+#include "ReadData.h"
 
 using namespace Imase;
 
