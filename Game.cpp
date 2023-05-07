@@ -5,6 +5,7 @@
 #include "pch.h"
 #include "Game.h"
 #include "Scene/SpriteSampleScene.h"
+#include "Scene/ModelSampleScene.h"
 
 extern void ExitGame() noexcept;
 
@@ -41,7 +42,7 @@ void Game::Initialize(HWND window, int width, int height)
     */
 
     // ‹N“®ƒV[ƒ“Ý’è
-    m_sceneManager->SetScene<SpriteSampleScene>();
+    m_sceneManager->SetScene<ModelSampleScene>();
 
 }
 

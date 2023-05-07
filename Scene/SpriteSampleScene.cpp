@@ -29,8 +29,6 @@ void SpriteSampleScene::Initialize()
 
 void SpriteSampleScene::Update(float elapsedTime)
 {
-	UNREFERENCED_PARAMETER(elapsedTime);
-
 	auto mouse = Mouse::Get().GetState();
 
 	// マウスの左ボタンが押されたら

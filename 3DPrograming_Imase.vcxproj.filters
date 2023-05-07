@@ -55,6 +55,9 @@
     <ClInclude Include="SpriteSheet.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\ModelSampleScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -77,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="ImaseLib\ResourceManager.cpp">
       <Filter>ImaseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\ModelSampleScene.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
