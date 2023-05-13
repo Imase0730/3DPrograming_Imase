@@ -58,6 +58,12 @@
     <ClInclude Include="Scene\ModelSampleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="DebugDraw.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ImaseLib\GridFloor.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -83,6 +89,12 @@
     </ClCompile>
     <ClCompile Include="Scene\ModelSampleScene.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugDraw.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ImaseLib\GridFloor.cpp">
+      <Filter>ImaseLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

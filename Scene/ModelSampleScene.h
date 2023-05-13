@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../ImaseLib/SceneManager.h"
-#include "../UserResources.h"
+#include "ImaseLib/SceneManager.h"
+#include "UserResources.h"
+#include "ImaseLib/GridFloor.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -30,6 +31,17 @@ public:
 
 	// デバイスロストした時に呼び出される関数
 	void OnDeviceLost() override;
+
+private:
+
+	// ビュー行列
+	DirectX::SimpleMath::Matrix m_view;
+
+	// 射影行列
+	DirectX::SimpleMath::Matrix m_proj;
+
+	// グリッドの床へのポインタ
+	std::unique_ptr<Imase::GridFloor> m_gridFloor;
 
 };
 
