@@ -8,7 +8,7 @@
 //--------------------------------------------------------------------------------------
 #include "pch.h"
 #include "GridFloor.h"
-#include "../DebugDraw.h"
+#include "DebugDraw.h"
 
 using namespace DirectX;
 using namespace Imase;
