@@ -22,8 +22,7 @@ DebugFont::DebugFont(ID3D11Device* device, ID3D11DeviceContext* context, wchar_t
 	m_spriteFont = std::make_unique<DirectX::SpriteFont>(device, fileName);
 
 	// フォントの縦サイズを取得する
-	SimpleMath::Vector2 textSize = m_spriteFont->MeasureString("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-	m_fontHeight = textSize.y;
+	m_fontHeight = m_spriteFont->GetLineSpacing();
 }
 
 // デストラクタ
