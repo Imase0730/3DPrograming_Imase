@@ -49,7 +49,7 @@ void Number::Render()
 	pos.y += m_frame[0]->origin.y * m_scale;
 
 	// Œ…”•ª‚¾‚¯•\¦ˆÊ’u‚ğˆÚ“®‚³‚¹‚é
-	pos.x += static_cast<float>(w) * m_scale * (m_digit - 1);
+	pos.x += w * m_scale * (m_digit - 1);
 
 	// ‰ºˆÊŒ…‚©‚ç‡”Ô‚É•`‰æ‚·‚é
 	while (number != 0)
@@ -57,6 +57,6 @@ void Number::Render()
 		uint32_t no = number % 10;
 		number /= 10;
 		m_sprites->Draw((*m_pSpriteBatch).get(), *m_frame[no], pos, Colors::White, 0.0f, m_scale);
-		pos.x -= static_cast<float>(w) * m_scale;
+		pos.x -= w * m_scale;
 	}
 }
