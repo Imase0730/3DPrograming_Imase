@@ -97,3 +97,4 @@ namespace DX
 #include "PrimitiveBatch.h"
 #include "SpriteBatch.h"
 #include "DDSTextureLoader.h"
+#include "Model.h"

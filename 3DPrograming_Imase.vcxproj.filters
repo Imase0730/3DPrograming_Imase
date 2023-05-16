@@ -20,6 +20,9 @@
     <Filter Include="Task">
       <UniqueIdentifier>{71066c12-e8da-49cc-9275-6fb28beebad4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FBX">
+      <UniqueIdentifier>{b7bf228b-6a53-46ae-8682-aec3d00cb2f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -64,6 +67,9 @@
     <ClInclude Include="ImaseLib\GridFloor.h">
       <Filter>ImaseLib</Filter>
     </ClInclude>
+    <ClInclude Include="ImaseLib\DebugCamera.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -94,6 +100,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="ImaseLib\GridFloor.cpp">
+      <Filter>ImaseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImaseLib\DebugCamera.cpp">
       <Filter>ImaseLib</Filter>
     </ClCompile>
   </ItemGroup>
@@ -129,5 +138,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <MeshContentTask Include="FBX\Dice.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
   </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@
 #include "ImaseLib/SceneManager.h"
 #include "UserResources.h"
 #include "ImaseLib/GridFloor.h"
+#include "ImaseLib/DebugCamera.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -34,6 +35,9 @@ public:
 
 private:
 
+	// デバッグカメラへのポインタ
+	std::unique_ptr<Imase::DebugCamera> m_debugCamera;
+
 	// ビュー行列
 	DirectX::SimpleMath::Matrix m_view;
 
@@ -42,6 +46,9 @@ private:
 
 	// グリッドの床へのポインタ
 	std::unique_ptr<Imase::GridFloor> m_gridFloor;
+
+	// サイコロモデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_diceModel;
 
 };
 

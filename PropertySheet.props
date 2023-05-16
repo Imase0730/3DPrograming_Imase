@@ -3,6 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <dds>Resources\Textures\</dds>
+    <cmo>Resources\Models\</cmo>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup>
@@ -24,10 +25,16 @@
     <ImageContentTask>
       <ContentOutput>$(dds)%(Filename).dds</ContentOutput>
     </ImageContentTask>
+    <MeshContentTask>
+      <ContentOutput>$(cmo)%(Filename).cmo</ContentOutput>
+    </MeshContentTask>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="dds">
       <Value>$(dds)</Value>
+    </BuildMacro>
+    <BuildMacro Include="cmo">
+      <Value>$(cmo)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

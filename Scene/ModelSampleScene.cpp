@@ -11,11 +11,18 @@ void ModelSampleScene::Initialize()
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
+
+	// デバッグカメラの作成
+	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
+	m_debugCamera = std::make_unique<Imase::DebugCamera>(rect.right, rect.bottom);
 }
 
 void ModelSampleScene::Update(float elapsedTime)
 {
 	elapsedTime;
+
+	// デバッグカメラの更新
+	m_debugCamera->Update();
 }
 
 void ModelSampleScene::Render()
@@ -24,21 +31,23 @@ void ModelSampleScene::Render()
 	debugFont->AddString(L"ModelSampleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
 
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
+	auto states = GetUserResources()->GetCommonStates();
 
-	// ビュー行列を作成
-	m_view = SimpleMath::Matrix::CreateLookAt(
-		SimpleMath::Vector3(0.0f, 10.0f, 10.0f),
-		SimpleMath::Vector3(0.0f, 0.0f, 0.0f),
-		SimpleMath::Vector3::UnitY
-	);
+	// ビュー行列を設定
+	m_view = m_debugCamera->GetCameraMatrix();
 
 	// グリッドの床を描画
 	m_gridFloor->Render(context, m_view, m_proj);
+
+	// サイコロの描画
+	SimpleMath::Matrix world;
+	m_diceModel->Draw(context, *states, world, m_view, m_proj);
 }
 
 void ModelSampleScene::Finalize()
 {
 	m_gridFloor.reset();
+	m_diceModel.reset();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
@@ -49,6 +58,11 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// グリッドの床を作成
 	m_gridFloor = std::make_unique<Imase::GridFloor>(device, context, states);
+
+	// サイコロモデル作成
+	std::unique_ptr<EffectFactory> fx = std::make_unique<EffectFactory>(device);
+	fx->SetDirectory(L"Resources/Models");
+	m_diceModel = Model::CreateFromCMO(device, L"Resources/Models/Dice.cmo", *fx);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
