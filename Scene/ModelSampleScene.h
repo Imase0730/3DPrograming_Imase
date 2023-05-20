@@ -50,5 +50,8 @@ private:
 	// サイコロモデルへのポインタ
 	std::unique_ptr<DirectX::Model> m_diceModel;
 
+	// ボールへのポインタ
+	std::unique_ptr<DirectX::Model> m_ballModel;
+
 };
 

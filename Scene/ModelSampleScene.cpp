@@ -39,15 +39,15 @@ void ModelSampleScene::Render()
 	// グリッドの床を描画
 	m_gridFloor->Render(context, m_view, m_proj);
 
-	// サイコロの描画
+	// ボールの描画
 	SimpleMath::Matrix world;
-	m_diceModel->Draw(context, *states, world, m_view, m_proj);
+	m_ballModel->Draw(context, *states, world, m_view, m_proj);
 }
 
 void ModelSampleScene::Finalize()
 {
 	m_gridFloor.reset();
-	m_diceModel.reset();
+	m_ballModel.reset();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
@@ -59,10 +59,21 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	// グリッドの床を作成
 	m_gridFloor = std::make_unique<Imase::GridFloor>(device, context, states);
 
-	// サイコロモデル作成
+	// ボールモデル作成
 	std::unique_ptr<EffectFactory> fx = std::make_unique<EffectFactory>(device);
 	fx->SetDirectory(L"Resources/Models");
-	m_diceModel = Model::CreateFromCMO(device, L"Resources/Models/Dice.cmo", *fx);
+	m_ballModel = Model::CreateFromCMO(device, L"Resources/Models/Ball.cmo", *fx);
+
+	// エフェクトの設定
+	m_ballModel->UpdateEffects([](IEffect* effect)
+		{
+			auto lights = dynamic_cast<IEffectLights*>(effect);
+			if (lights)
+			{
+				lights->SetPerPixelLighting(true);
+			}
+		}
+	);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
