@@ -65,6 +65,12 @@ void Game::Update(DX::StepTimer const& timer)
 
     // TODO: Add your game logic here.
 
+    // キーボードステートトラッカーの更新
+    m_keyboardTracker.Update(Keyboard::Get().GetState());
+
+    // マウスステートトラッカーの更新
+    m_mouseTracker.Update(Mouse::Get().GetState());
+
     // シーンの更新
     m_sceneManager->Update(elapsedTime);
 }
