@@ -53,5 +53,31 @@ private:
 	// ボールへのポインタ
 	std::unique_ptr<DirectX::Model> m_ballModel;
 
+private:
+
+	// ベーシックエフェクトへのポインタ
+	std::unique_ptr<DirectX::BasicEffect> m_basicEffect;
+
+	// プリミティブバッチへのポインタ
+	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_primitiveBatch;
+
+	// 入力レイアウトへのポインタ
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
+
+	// ボールの進行方向
+	DirectX::SimpleMath::Vector3 m_forward;
+
+	// ボールの回転軸
+	DirectX::SimpleMath::Vector3 m_horizontal;
+
+	// ボールの位置
+	DirectX::SimpleMath::Vector3 m_pos;
+
+	// ボールの回転
+	DirectX::SimpleMath::Quaternion m_rotate;
+
+	// ボールの速さ
+	float m_speed;
+
 };
 
