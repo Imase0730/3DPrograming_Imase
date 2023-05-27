@@ -255,6 +255,7 @@
   <ItemGroup>
     <MeshContentTask Include="FBX\Ball.fbx" />
     <MeshContentTask Include="FBX\Dice.fbx" />
+    <MeshContentTask Include="FBX\Plane.fbx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -47,11 +47,8 @@ private:
 	// グリッドの床へのポインタ
 	std::unique_ptr<Imase::GridFloor> m_gridFloor;
 
-	// サイコロモデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_diceModel;
-
-	// ボールへのポインタ
-	std::unique_ptr<DirectX::Model> m_ballModel;
+	// 飛行機モデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_planeModel;
 
 private:
 
@@ -63,21 +60,6 @@ private:
 
 	// 入力レイアウトへのポインタ
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-
-	// ボールの進行方向
-	DirectX::SimpleMath::Vector3 m_forward;
-
-	// ボールの回転軸
-	DirectX::SimpleMath::Vector3 m_horizontal;
-
-	// ボールの位置
-	DirectX::SimpleMath::Vector3 m_pos;
-
-	// ボールの回転
-	DirectX::SimpleMath::Quaternion m_rotate;
-
-	// ボールの速さ
-	float m_speed;
 
 };
 
