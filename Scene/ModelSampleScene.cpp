@@ -16,6 +16,9 @@ void ModelSampleScene::Initialize()
 	// デバッグカメラの作成
 	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
 	m_debugCamera = std::make_unique<Imase::DebugCamera>(rect.right, rect.bottom);
+
+	// 飛行機の初期姿勢の設定
+	m_rotate = SimpleMath::Quaternion::FromToRotation(SimpleMath::Vector3(0.0f, 0.0f, 1.0f), SimpleMath::Vector3(0.0f, 0.0f, -1.0f));
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -24,6 +27,25 @@ void ModelSampleScene::Update(float elapsedTime)
 
 	// デバッグカメラの更新
 	m_debugCamera->Update();
+
+	auto kb = Keyboard::Get().GetState();
+
+	SimpleMath::Quaternion q;
+
+	// ピッチ
+	if (kb.W) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitX, XMConvertToRadians(1.0f));
+	if (kb.S) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitX, XMConvertToRadians(-1.0f));
+
+	// ヨー
+	if (kb.A) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(1.0f));
+	if (kb.D) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(-1.0f));
+
+	// ロール
+	if (kb.E) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(1.0f));
+	if (kb.Q) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(-1.0f));
+
+	// 姿勢に回転を加える
+	m_rotate = q * m_rotate;
 }
 
 void ModelSampleScene::Render()
@@ -41,10 +63,16 @@ void ModelSampleScene::Render()
 	m_gridFloor->Render(context, m_view, m_proj);
 
 	// 飛行機の描画
-	SimpleMath::Matrix world;
+	SimpleMath::Matrix world = SimpleMath::Matrix::CreateFromQuaternion(m_rotate);
 	m_planeModel->Draw(context, *states, world, m_view, m_proj);
 
 	// 軸の描画
+
+	// 角軸のベクトルを求める
+	SimpleMath::Vector3 forward = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 1.5f), m_rotate);
+	SimpleMath::Vector3 horizontal = SimpleMath::Vector3::Transform(SimpleMath::Vector3(1.5f, 0.0f, 0.0f), m_rotate);
+	SimpleMath::Vector3 vertical = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 1.5f, 0.0f), m_rotate);
+
 	context->OMSetBlendState(states->Opaque(), nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(states->DepthDefault(), 0);
 	context->RSSetState(states->CullNone());
@@ -56,6 +84,11 @@ void ModelSampleScene::Render()
 	context->IASetInputLayout(m_inputLayout.Get());
 
 	m_primitiveBatch->Begin();
+
+	DX::DrawRay(m_primitiveBatch.get(), SimpleMath::Vector3::Zero, forward, false, Colors::Yellow);
+	DX::DrawRay(m_primitiveBatch.get(), SimpleMath::Vector3::Zero, horizontal, false, Colors::Red);
+	DX::DrawRay(m_primitiveBatch.get(), SimpleMath::Vector3::Zero, vertical, false, Colors::Blue);
+
 	m_primitiveBatch->End();
 }
 

@@ -61,5 +61,10 @@ private:
 	// 入力レイアウトへのポインタ
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 
+private:
+
+	// 飛行機の姿勢を表す回転クォータニオン
+	DirectX::SimpleMath::Quaternion m_rotate;
+
 };
 
