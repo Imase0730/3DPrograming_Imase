@@ -63,6 +63,9 @@ private:
 
 private:
 
+	// 飛行機の位置
+	DirectX::SimpleMath::Vector3 m_planePos;
+
 	// 飛行機の姿勢を表す回転クォータニオン
 	DirectX::SimpleMath::Quaternion m_rotate;
 

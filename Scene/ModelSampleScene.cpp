@@ -37,15 +37,19 @@ void ModelSampleScene::Update(float elapsedTime)
 	if (kb.S) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitX, XMConvertToRadians(-1.0f));
 
 	// ƒˆ[
-	if (kb.A) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(1.0f));
-	if (kb.D) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(-1.0f));
+	if (kb.Left) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(1.0f));
+	if (kb.Right) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(-1.0f));
 
 	// ƒ[ƒ‹
-	if (kb.E) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(1.0f));
-	if (kb.Q) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(-1.0f));
+	if (kb.D) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(1.0f));
+	if (kb.A) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(-1.0f));
 
 	// p¨‚É‰ñ“]‚ğ‰Á‚¦‚é
 	m_rotate = q * m_rotate;
+
+	// ‘OiEŒãi
+	if (kb.Up) m_planePos += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 0.1f), m_rotate);
+	if (kb.Down) m_planePos += SimpleMath::Vector3::Transform(-SimpleMath::Vector3(0.0f, 0.0f, 0.1f), m_rotate);
 }
 
 void ModelSampleScene::Render()
@@ -63,7 +67,9 @@ void ModelSampleScene::Render()
 	m_gridFloor->Render(context, m_view, m_proj);
 
 	// ”òs‹@‚Ì•`‰æ
-	SimpleMath::Matrix world = SimpleMath::Matrix::CreateFromQuaternion(m_rotate);
+	SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_rotate);
+	SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_planePos);
+	SimpleMath::Matrix world = rotate * trans;
 	m_planeModel->Draw(context, *states, world, m_view, m_proj);
 
 	// ²‚Ì•`‰æ
@@ -85,9 +91,9 @@ void ModelSampleScene::Render()
 
 	m_primitiveBatch->Begin();
 
-	DX::DrawRay(m_primitiveBatch.get(), SimpleMath::Vector3::Zero, forward, false, Colors::Yellow);
-	DX::DrawRay(m_primitiveBatch.get(), SimpleMath::Vector3::Zero, horizontal, false, Colors::Red);
-	DX::DrawRay(m_primitiveBatch.get(), SimpleMath::Vector3::Zero, vertical, false, Colors::Blue);
+	DX::DrawRay(m_primitiveBatch.get(), m_planePos, forward, false, Colors::Yellow);
+	DX::DrawRay(m_primitiveBatch.get(), m_planePos, horizontal, false, Colors::Red);
+	DX::DrawRay(m_primitiveBatch.get(), m_planePos, vertical, false, Colors::Blue);
 
 	m_primitiveBatch->End();
 }
