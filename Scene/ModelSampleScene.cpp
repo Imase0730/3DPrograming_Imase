@@ -5,6 +5,7 @@
 using namespace DirectX;
 
 ModelSampleScene::ModelSampleScene()
+	: m_selectNo(0)
 {
 }
 
@@ -19,6 +20,12 @@ void ModelSampleScene::Initialize()
 
 	// 飛行機の初期姿勢の設定
 	m_rotate = SimpleMath::Quaternion::FromToRotation(SimpleMath::Vector3(0.0f, 0.0f, 1.0f), SimpleMath::Vector3(0.0f, 0.0f, -1.0f));
+
+	// 衝突判定用オブジェクトの初期値を設定する
+	m_object[0].position = SimpleMath::Vector3(1.0f, 0.0f, 0.0f);
+	m_object[0].boundingSphere.Radius = 0.5f;
+
+	m_object[1].position = SimpleMath::Vector3(-1.0f, 0.0f, 0.0f);
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -29,6 +36,23 @@ void ModelSampleScene::Update(float elapsedTime)
 	m_debugCamera->Update();
 
 	auto kb = Keyboard::Get().GetState();
+	auto kbTracker = GetUserResources()->GetKeyboardStateTracker();
+
+	// スペースキーが押されたら選択オブジェクトを変更する
+	if (kbTracker->pressed.Space)
+	{
+		if (m_selectNo)
+		{
+			m_selectNo = 0;
+		}
+		else
+		{
+			m_selectNo = 1;
+		}
+	}
+
+	// 選択中のオブジェクトを取得する
+	CollisionTest::Object* p = &m_object[m_selectNo];
 
 	SimpleMath::Quaternion q;
 
@@ -45,17 +69,23 @@ void ModelSampleScene::Update(float elapsedTime)
 	if (kb.A) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(-1.0f));
 
 	// 姿勢に回転を加える
-	m_rotate = q * m_rotate;
+	p->rotate = q * p->rotate;
 
 	// 前進・後進
-	if (kb.Up) m_planePos += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 0.1f), m_rotate);
-	if (kb.Down) m_planePos += SimpleMath::Vector3::Transform(-SimpleMath::Vector3(0.0f, 0.0f, 0.1f), m_rotate);
+	if (kb.Up) p->position += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 0.1f), p->rotate);
+	if (kb.Down) p->position += SimpleMath::Vector3::Transform(-SimpleMath::Vector3(0.0f, 0.0f, 0.1f), p->rotate);
 }
 
 void ModelSampleScene::Render()
 {
 	auto debugFont = GetUserResources()->GetDebugFont();
 	debugFont->AddString(L"ModelSampleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
+
+	// オブジェクト同士の衝突判定を行う
+	if (HitCheck_Sphere2Sphere(m_object[0].GetBoundingSphere(), m_object[1].GetBoundingSphere()))
+	{
+		debugFont->AddString(L"Hit!", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight() * 2));
+	}
 
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
 	auto states = GetUserResources()->GetCommonStates();
@@ -66,18 +96,20 @@ void ModelSampleScene::Render()
 	// グリッドの床を描画
 	m_gridFloor->Render(context, m_view, m_proj);
 
-	// 飛行機の描画
-	SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_rotate);
-	SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_planePos);
-	SimpleMath::Matrix world = rotate * trans;
-	m_planeModel->Draw(context, *states, world, m_view, m_proj);
+	//// 飛行機の描画
+	//SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_rotate);
+	//SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_planePos);
+	//SimpleMath::Matrix world = rotate * trans;
+	//m_planeModel->Draw(context, *states, world, m_view, m_proj);
 
 	// 軸の描画
+	// 選択中のオブジェクトを取得する
+	CollisionTest::Object* p = &m_object[m_selectNo];
 
 	// 角軸のベクトルを求める
-	SimpleMath::Vector3 forward = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 1.5f), m_rotate);
-	SimpleMath::Vector3 horizontal = SimpleMath::Vector3::Transform(SimpleMath::Vector3(1.5f, 0.0f, 0.0f), m_rotate);
-	SimpleMath::Vector3 vertical = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 1.5f, 0.0f), m_rotate);
+	SimpleMath::Vector3 forward = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 1.5f), p->rotate);
+	SimpleMath::Vector3 horizontal = SimpleMath::Vector3::Transform(SimpleMath::Vector3(1.5f, 0.0f, 0.0f), p->rotate);
+	SimpleMath::Vector3 vertical = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 1.5f, 0.0f), p->rotate);
 
 	context->OMSetBlendState(states->Opaque(), nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(states->DepthDefault(), 0);
@@ -91,11 +123,18 @@ void ModelSampleScene::Render()
 
 	m_primitiveBatch->Begin();
 
-	DX::DrawRay(m_primitiveBatch.get(), m_planePos, forward, false, Colors::Yellow);
-	DX::DrawRay(m_primitiveBatch.get(), m_planePos, horizontal, false, Colors::Red);
-	DX::DrawRay(m_primitiveBatch.get(), m_planePos, vertical, false, Colors::Blue);
+	DX::DrawRay(m_primitiveBatch.get(), p->position, forward, false, Colors::Yellow);
+	DX::DrawRay(m_primitiveBatch.get(), p->position, horizontal, false, Colors::Red);
+	DX::DrawRay(m_primitiveBatch.get(), p->position, vertical, false, Colors::Blue);
 
 	m_primitiveBatch->End();
+
+	// 衝突判定の登録
+	m_displayCollision->AddBoundingSphere(m_object[0].GetBoundingSphere());
+	m_displayCollision->AddBoundingSphere(m_object[1].GetBoundingSphere());
+
+	// 衝突判定の表示
+	m_displayCollision->DrawCollision(context, states, m_view, m_proj);
 }
 
 void ModelSampleScene::Finalize()
@@ -105,6 +144,7 @@ void ModelSampleScene::Finalize()
 	m_inputLayout.Reset();
 	m_gridFloor.reset();
 	m_planeModel.reset();
+	m_displayCollision.reset();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
@@ -135,6 +175,10 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	std::unique_ptr<EffectFactory> fx = std::make_unique<EffectFactory>(device);
 	fx->SetDirectory(L"Resources/Models");
 	m_planeModel = Model::CreateFromCMO(device, L"Resources/Models/Plane.cmo", *fx);
+
+	// 衝突判定の表示オブジェクトの作成
+	m_displayCollision = std::make_unique<Imase::DisplayCollision>(device, context);
+
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
@@ -151,4 +195,18 @@ void ModelSampleScene::CreateWindowSizeDependentResources()
 void ModelSampleScene::OnDeviceLost()
 {
 	Finalize();
+}
+
+// 球と球の衝突判定関数
+bool ModelSampleScene::HitCheck_Sphere2Sphere(
+	const DirectX::BoundingSphere& sphere1,
+	const DirectX::BoundingSphere& sphere2
+)
+{
+	// 2つの球の中心の間の距離の平方を計算
+	SimpleMath::Vector3 d = SimpleMath::Vector3(sphere1.Center) - SimpleMath::Vector3(sphere2.Center);
+	float distSq = d.Dot(d);
+	// 平方した距離が平方した半径の合計よりも小さい場合に球は交差している
+	float radiusSum = sphere1.Radius + sphere2.Radius;
+	return distSq <= radiusSum * radiusSum;
 }

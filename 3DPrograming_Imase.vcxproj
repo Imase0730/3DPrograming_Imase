@@ -195,6 +195,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="ImaseLib\DebugCamera.h" />
     <ClInclude Include="ImaseLib\DebugFont.h" />
+    <ClInclude Include="ImaseLib\DisplayCollision.h" />
     <ClInclude Include="ImaseLib\GridFloor.h" />
     <ClInclude Include="ImaseLib\ResourceManager.h" />
     <ClInclude Include="ImaseLib\SceneManager.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="ReadData.h" />
     <ClInclude Include="Scene\ModelSampleScene.h" />
+    <ClInclude Include="Scene\Object.h" />
     <ClInclude Include="Scene\SpriteSampleScene.h" />
     <ClInclude Include="SpriteSheet.h" />
     <ClInclude Include="StepTimer.h" />
@@ -217,6 +219,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="ImaseLib\DisplayCollision.cpp" />
     <ClCompile Include="ImaseLib\GridFloor.cpp" />
     <ClCompile Include="ImaseLib\ResourceManager.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>

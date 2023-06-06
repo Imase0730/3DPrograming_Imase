@@ -70,6 +70,12 @@
     <ClInclude Include="ImaseLib\DebugCamera.h">
       <Filter>ImaseLib</Filter>
     </ClInclude>
+    <ClInclude Include="ImaseLib\DisplayCollision.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Object.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -103,6 +109,9 @@
       <Filter>ImaseLib</Filter>
     </ClCompile>
     <ClCompile Include="ImaseLib\DebugCamera.cpp">
+      <Filter>ImaseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImaseLib\DisplayCollision.cpp">
       <Filter>ImaseLib</Filter>
     </ClCompile>
   </ItemGroup>

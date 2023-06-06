@@ -4,6 +4,8 @@
 #include "UserResources.h"
 #include "ImaseLib/GridFloor.h"
 #include "ImaseLib/DebugCamera.h"
+#include "ImaseLib/DisplayCollision.h"
+#include "Object.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -69,5 +71,21 @@ private:
 	// 飛行機の姿勢を表す回転クォータニオン
 	DirectX::SimpleMath::Quaternion m_rotate;
 
+private:
+
+	// 衝突判定の表示オブジェクトへのポインタ
+	std::unique_ptr<Imase::DisplayCollision> m_displayCollision;
+
+	// 衝突判定用オブジェクト
+	CollisionTest::Object m_object[2];
+
+	// 選択中のオブジェクトの番号
+	int m_selectNo;
+
+	// 球と球の衝突判定
+	bool HitCheck_Sphere2Sphere(
+		const DirectX::BoundingSphere& sphere1,
+		const DirectX::BoundingSphere& sphere2
+	);
 };
 
