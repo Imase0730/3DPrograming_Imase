@@ -23,9 +23,9 @@ void ModelSampleScene::Initialize()
 
 	// 衝突判定用オブジェクトの初期値を設定する
 	m_object[0].position = SimpleMath::Vector3(1.0f, 0.0f, 0.0f);
-	m_object[0].boundingSphere.Radius = 0.5f;
-
 	m_object[1].position = SimpleMath::Vector3(-1.0f, 0.0f, 0.0f);
+	m_object[0].boundingBox.Extents = SimpleMath::Vector3(0.5f, 0.5f, 1.0f);
+	m_object[1].boundingBox.Extents = SimpleMath::Vector3(1.0f, 0.5f, 0.5f);
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -82,7 +82,7 @@ void ModelSampleScene::Render()
 	debugFont->AddString(L"ModelSampleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
 
 	// オブジェクト同士の衝突判定を行う
-	if (HitCheck_Sphere2Sphere(m_object[0].GetBoundingSphere(), m_object[1].GetBoundingSphere()))
+	if (m_object[0].GetBoundingOrientedBox().Intersects(m_object[1].GetBoundingOrientedBox()))
 	{
 		debugFont->AddString(L"Hit!", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight() * 2));
 	}
@@ -130,8 +130,8 @@ void ModelSampleScene::Render()
 	m_primitiveBatch->End();
 
 	// 衝突判定の登録
-	m_displayCollision->AddBoundingSphere(m_object[0].GetBoundingSphere());
-	m_displayCollision->AddBoundingSphere(m_object[1].GetBoundingSphere());
+	m_displayCollision->AddBoundingOrientedBox(m_object[0].GetBoundingOrientedBox());
+	m_displayCollision->AddBoundingOrientedBox(m_object[1].GetBoundingOrientedBox());
 
 	// 衝突判定の表示
 	m_displayCollision->DrawCollision(context, states, m_view, m_proj);
@@ -178,7 +178,6 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// 衝突判定の表示オブジェクトの作成
 	m_displayCollision = std::make_unique<Imase::DisplayCollision>(device, context);
-
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()

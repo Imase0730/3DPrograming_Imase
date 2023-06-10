@@ -11,6 +11,8 @@ namespace CollisionTest
 		// 回転
 		DirectX::SimpleMath::Quaternion rotate;
 
+		// -------------------------------------------------------- //
+
 		// 衝突判定（球）
 		DirectX::BoundingSphere boundingSphere;
 
@@ -18,9 +20,32 @@ namespace CollisionTest
 		DirectX::BoundingSphere GetBoundingSphere()
 		{
 			DirectX::BoundingSphere tmp(boundingSphere);
-			tmp.Center.x += position.x;
-			tmp.Center.y += position.y;
-			tmp.Center.z += position.z;
+			tmp.Center = DirectX::SimpleMath::Vector3::Transform(boundingSphere.Center, rotate) + position;
+			return tmp;
+		}
+
+		// -------------------------------------------------------- //
+
+		// 衝突判定（AABB）
+		DirectX::BoundingBox boundingBox;
+
+		// 衝突判定情報取得関数（AABB）
+		DirectX::BoundingBox GetBoundingBox()
+		{
+			DirectX::BoundingBox tmp(boundingBox);
+			tmp.Center = DirectX::SimpleMath::Vector3::Transform(boundingBox.Center, rotate) + position;
+			return tmp;
+		}
+
+		// -------------------------------------------------------- //
+
+		// 衝突判定情報取得関数（OBB）
+		DirectX::BoundingOrientedBox GetBoundingOrientedBox()
+		{
+			DirectX::BoundingOrientedBox tmp;
+			DirectX::BoundingOrientedBox::CreateFromBoundingBox(tmp, boundingBox);
+			tmp.Center = DirectX::SimpleMath::Vector3::Transform(boundingBox.Center, rotate) + position;
+			tmp.Orientation = rotate;
 			return tmp;
 		}
 	};
