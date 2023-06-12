@@ -275,7 +275,7 @@ namespace Imase
 	{
 	public:
 
-		static std::unique_ptr<ModelCollision> CreateCollision(ModelCollision::CollisionType type, DirectX::Model* pModel)
+		static std::unique_ptr<ModelCollision> CreateCollision(DirectX::Model* pModel, ModelCollision::CollisionType type = ModelCollision::CollisionType::Sphere)
 		{
 			std::unique_ptr<ModelCollision> collision;
 
