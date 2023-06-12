@@ -24,8 +24,10 @@ void ModelSampleScene::Initialize()
 	// 衝突判定用オブジェクトの初期値を設定する
 	m_object[0].position = SimpleMath::Vector3(1.0f, 0.0f, 0.0f);
 	m_object[1].position = SimpleMath::Vector3(-1.0f, 0.0f, 0.0f);
-	m_object[0].boundingBox.Extents = SimpleMath::Vector3(0.5f, 0.5f, 1.0f);
-	m_object[1].boundingBox.Extents = SimpleMath::Vector3(1.0f, 0.5f, 0.5f);
+
+	// 衝突判定オブジェクトを作成する
+	m_modelCollision[0] = Imase::ModelCollisionFactory::CreateCollision(Imase::ModelCollision::CollisionType::OBB, m_pacmanModel.get());
+	m_modelCollision[1] = Imase::ModelCollisionFactory::CreateCollision(Imase::ModelCollision::CollisionType::Sphere, m_planeModel.get());
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -74,6 +76,11 @@ void ModelSampleScene::Update(float elapsedTime)
 	// 前進・後進
 	if (kb.Up) p->position += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 0.1f), p->rotate);
 	if (kb.Down) p->position += SimpleMath::Vector3::Transform(-SimpleMath::Vector3(0.0f, 0.0f, 0.1f), p->rotate);
+
+	// コリジョン情報の更新
+	m_modelCollision[0]->UpdateBoundingInfo(m_object[0].position, m_object[0].rotate);
+	m_modelCollision[1]->UpdateBoundingInfo(m_object[1].position, m_object[1].rotate);
+
 }
 
 void ModelSampleScene::Render()
@@ -82,7 +89,7 @@ void ModelSampleScene::Render()
 	debugFont->AddString(L"ModelSampleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
 
 	// オブジェクト同士の衝突判定を行う
-	if (m_object[0].GetBoundingOrientedBox().Intersects(m_object[1].GetBoundingOrientedBox()))
+	if (m_modelCollision[0]->Intersects(m_modelCollision[1].get()))
 	{
 		debugFont->AddString(L"Hit!", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight() * 2));
 	}
@@ -96,11 +103,17 @@ void ModelSampleScene::Render()
 	// グリッドの床を描画
 	m_gridFloor->Render(context, m_view, m_proj);
 
-	//// 飛行機の描画
-	//SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_rotate);
-	//SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_planePos);
-	//SimpleMath::Matrix world = rotate * trans;
-	//m_planeModel->Draw(context, *states, world, m_view, m_proj);
+	// パックマンの描画
+	SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_object[0].rotate);
+	SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_object[0].position);
+	SimpleMath::Matrix world = rotate * trans;
+	m_pacmanModel->Draw(context, *states, world, m_view, m_proj);
+
+	// 飛行機の描画
+	rotate = SimpleMath::Matrix::CreateFromQuaternion(m_object[1].rotate);
+	trans = SimpleMath::Matrix::CreateTranslation(m_object[1].position);
+	world = rotate * trans;
+	m_planeModel->Draw(context, *states, world, m_view, m_proj);
 
 	// 軸の描画
 	// 選択中のオブジェクトを取得する
@@ -130,8 +143,8 @@ void ModelSampleScene::Render()
 	m_primitiveBatch->End();
 
 	// 衝突判定の登録
-	m_displayCollision->AddBoundingOrientedBox(m_object[0].GetBoundingOrientedBox());
-	m_displayCollision->AddBoundingOrientedBox(m_object[1].GetBoundingOrientedBox());
+	m_modelCollision[0]->AddDisplayCollision(m_displayCollision.get());
+	m_modelCollision[1]->AddDisplayCollision(m_displayCollision.get());
 
 	// 衝突判定の表示
 	m_displayCollision->DrawCollision(context, states, m_view, m_proj);
@@ -175,6 +188,9 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	std::unique_ptr<EffectFactory> fx = std::make_unique<EffectFactory>(device);
 	fx->SetDirectory(L"Resources/Models");
 	m_planeModel = Model::CreateFromCMO(device, L"Resources/Models/Plane.cmo", *fx);
+
+	// パックマンモデルの作成
+	m_pacmanModel = Model::CreateFromCMO(device, L"Resources/Models/Pacman.cmo", *fx);
 
 	// 衝突判定の表示オブジェクトの作成
 	m_displayCollision = std::make_unique<Imase::DisplayCollision>(device, context);

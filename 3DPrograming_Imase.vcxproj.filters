@@ -76,6 +76,9 @@
     <ClInclude Include="Scene\Object.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="ImaseLib\ModelCollision.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -112,6 +115,9 @@
       <Filter>ImaseLib</Filter>
     </ClCompile>
     <ClCompile Include="ImaseLib\DisplayCollision.cpp">
+      <Filter>ImaseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="ImaseLib\ModelCollision.cpp">
       <Filter>ImaseLib</Filter>
     </ClCompile>
   </ItemGroup>
@@ -153,6 +159,9 @@
       <Filter>FBX</Filter>
     </MeshContentTask>
     <MeshContentTask Include="FBX\Plane.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="FBX\Pacman.fbx">
       <Filter>FBX</Filter>
     </MeshContentTask>
   </ItemGroup>

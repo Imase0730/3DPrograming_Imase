@@ -6,6 +6,7 @@
 #include "ImaseLib/DebugCamera.h"
 #include "ImaseLib/DisplayCollision.h"
 #include "Object.h"
+#include "ImaseLib/ModelCollision.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -52,6 +53,9 @@ private:
 	// 飛行機モデルへのポインタ
 	std::unique_ptr<DirectX::Model> m_planeModel;
 
+	// パックマンモデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_pacmanModel;
+
 private:
 
 	// ベーシックエフェクトへのポインタ
@@ -87,5 +91,9 @@ private:
 		const DirectX::BoundingSphere& sphere1,
 		const DirectX::BoundingSphere& sphere2
 	);
+
+	// 衝突判定のオブジェクトへのポインタ
+	std::unique_ptr<Imase::ModelCollision> m_modelCollision[2];
+
 };
 
