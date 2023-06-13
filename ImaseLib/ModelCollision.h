@@ -88,7 +88,7 @@ namespace Imase
 	};
 
 	// Õ“Ë”»’è¶¬ƒNƒ‰ƒX
-	class CollisionFactory
+	class ModelCollisionFactory
 	{
 	public:
 

@@ -251,7 +251,7 @@ void ModelCollision::AddDisplayCollision(Imase::DisplayCollision* displayCollisi
 // ------------------------------------------------------------------------- //
 
 // è’ìÀîªíËê∂ê¨
-std::unique_ptr<ModelCollision> CollisionFactory::CreateCollision(const DirectX::Model* pModel, ModelCollision::CollisionType type)
+std::unique_ptr<ModelCollision> ModelCollisionFactory::CreateCollision(const DirectX::Model* pModel, ModelCollision::CollisionType type)
 {
 	std::unique_ptr<ModelCollision> collision;
 
