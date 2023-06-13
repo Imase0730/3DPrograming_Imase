@@ -150,7 +150,7 @@ namespace Imase
 		);
 		
 		// 球のコリジョンを登録する関数
-		void AddBoundingSphere(
+		void AddBoundingVolume(
 			DirectX::BoundingSphere shpere,
 			DirectX::FXMVECTOR lineColor = DirectX::XMVECTORF32{ 0.0f, 0.0f, 0.0f, 0.0f })
 		{
@@ -159,7 +159,7 @@ namespace Imase
 		}
 
 		// ボックスのコリジョンを登録する関数
-		void AddBoundingBox(
+		void AddBoundingVolume(
 			DirectX::BoundingBox box,
 			DirectX::FXMVECTOR lineColor = DirectX::XMVECTORF32{ 0.0f, 0.0f, 0.0f, 0.0f })
 		{
@@ -167,7 +167,7 @@ namespace Imase
 		}
 
 		// 回転したボックスのコリジョンを登録する関数
-		void AddBoundingOrientedBox(
+		void AddBoundingVolume(
 			DirectX::BoundingOrientedBox box,
 			DirectX::FXMVECTOR lineColor = DirectX::XMVECTORF32{ 0.0f, 0.0f, 0.0f, 0.0f })
 		{

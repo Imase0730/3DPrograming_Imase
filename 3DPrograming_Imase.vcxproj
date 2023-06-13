@@ -193,11 +193,11 @@
     <ClInclude Include="DebugDraw.h" />
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="ImaseLib\ModelCollision.h" />
     <ClInclude Include="ImaseLib\DebugCamera.h" />
     <ClInclude Include="ImaseLib\DebugFont.h" />
     <ClInclude Include="ImaseLib\DisplayCollision.h" />
     <ClInclude Include="ImaseLib\GridFloor.h" />
-    <ClInclude Include="ImaseLib\ModelCollision.h" />
     <ClInclude Include="ImaseLib\ResourceManager.h" />
     <ClInclude Include="ImaseLib\SceneManager.h" />
     <ClInclude Include="ImaseLib\TaskManager.h" />
@@ -215,6 +215,7 @@
     <ClCompile Include="DebugDraw.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="ImaseLib\ModelCollision.cpp" />
     <ClCompile Include="ImaseLib\DebugCamera.cpp" />
     <ClCompile Include="ImaseLib\DebugFont.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
@@ -222,7 +223,6 @@
     </ClCompile>
     <ClCompile Include="ImaseLib\DisplayCollision.cpp" />
     <ClCompile Include="ImaseLib\GridFloor.cpp" />
-    <ClCompile Include="ImaseLib\ModelCollision.cpp" />
     <ClCompile Include="ImaseLib\ResourceManager.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>

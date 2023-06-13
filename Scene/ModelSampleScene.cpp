@@ -26,8 +26,8 @@ void ModelSampleScene::Initialize()
 	m_object[1].position = SimpleMath::Vector3(-1.0f, 0.0f, 0.0f);
 
 	// 衝突判定オブジェクトを作成する
-	m_modelCollision[0] = Imase::ModelCollisionFactory::CreateCollision(m_pacmanModel.get(), Imase::ModelCollision::CollisionType::OBB);
-	m_modelCollision[1] = Imase::ModelCollisionFactory::CreateCollision(m_planeModel.get(), Imase::ModelCollision::CollisionType::Sphere);
+	m_modelCollision[0] = Imase::CollisionFactory::CreateCollision(m_pacmanModel.get(), Imase::ModelCollision::CollisionType::OBB);
+	m_modelCollision[1] = Imase::CollisionFactory::CreateCollision(m_planeModel.get(), Imase::ModelCollision::CollisionType::Sphere);
 }
 
 void ModelSampleScene::Update(float elapsedTime)
