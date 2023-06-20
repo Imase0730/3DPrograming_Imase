@@ -7,6 +7,7 @@
 #include "ImaseLib/DisplayCollision.h"
 #include "Object.h"
 #include "ImaseLib/ModelCollision.h"
+#include "ImaseLib/ObjCollision.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -50,30 +51,8 @@ private:
 	// グリッドの床へのポインタ
 	std::unique_ptr<Imase::GridFloor> m_gridFloor;
 
-	// 飛行機モデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_planeModel;
-
-	// パックマンモデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_pacmanModel;
-
-private:
-
-	// ベーシックエフェクトへのポインタ
-	std::unique_ptr<DirectX::BasicEffect> m_basicEffect;
-
-	// プリミティブバッチへのポインタ
-	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_primitiveBatch;
-
-	// 入力レイアウトへのポインタ
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-
-private:
-
-	// 飛行機の位置
-	DirectX::SimpleMath::Vector3 m_planePos;
-
-	// 飛行機の姿勢を表す回転クォータニオン
-	DirectX::SimpleMath::Quaternion m_rotate;
+	// 車モデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_carModel;
 
 private:
 
@@ -86,14 +65,11 @@ private:
 	// 選択中のオブジェクトの番号
 	int m_selectNo;
 
-	// 球と球の衝突判定
-	bool HitCheck_Sphere2Sphere(
-		const DirectX::BoundingSphere& sphere1,
-		const DirectX::BoundingSphere& sphere2
-	);
+	// 衝突判定用メッシュへのポインタ
+	std::unique_ptr<Imase::ObjCollision> m_objCollision;
 
-	// 衝突判定のオブジェクトへのポインタ
-	std::unique_ptr<Imase::ModelCollision> m_modelCollision[2];
+	// 線分
+	DirectX::SimpleMath::Vector3 m_line[2];
 
 };
 

@@ -8,10 +8,7 @@
 //--------------------------------------------------------------------------------------
 #include "pch.h"
 #include "DisplayCollision.h"
-
-#ifdef _COLLISION_LINE_ON
 #include "DebugDraw.h"
-#endif
 
 using namespace DirectX;
 using namespace Imase;
@@ -53,6 +50,12 @@ DisplayCollision::DisplayCollision(
 	m_lineEffect->SetLightingEnabled(false);
 	m_lineEffect->SetWorld(SimpleMath::Matrix::Identity);
 
+	// エフェクトの作成（メッシュ用）
+	m_meshEffect = std::make_unique<BasicEffect>(device);
+	m_meshEffect->SetVertexColorEnabled(false);
+	m_meshEffect->SetTextureEnabled(false);
+	m_meshEffect->SetLightingEnabled(false);
+
 	// ----- 入力レイアウト ----- //
 
 	// 入力レイアウトの作成（モデル用）
@@ -84,7 +87,15 @@ DisplayCollision::DisplayCollision(
 			m_instancedVB.ReleaseAndGetAddressOf())
 	);
 
-#ifdef _COLLISION_LINE_ON
+	// プリミティブバッチの作成（メッシュ用）
+	m_meshBatch = std::make_unique<PrimitiveBatch<VertexPosition>>(context);
+
+	// 入力レイアウトの作成（メッシュ用）
+	DX::ThrowIfFailed(
+		CreateInputLayoutFromEffect<VertexPosition>(device, m_meshEffect.get(),
+			m_meshInputLayout.ReleaseAndGetAddressOf())
+	);
+
 	// プリミティブバッチの作成
 	m_primitiveBatch = std::make_unique<PrimitiveBatch<VertexPositionColor>>(context);
 
@@ -93,7 +104,6 @@ DisplayCollision::DisplayCollision(
 		CreateInputLayoutFromEffect<VertexPositionColor>(device, m_lineEffect.get(),
 			m_lineInputLayout.ReleaseAndGetAddressOf())
 	);
-#endif
 
 }
 
@@ -114,20 +124,22 @@ void DisplayCollision::DrawCollision(
 	// コリジョンモデルの描画
 	if (m_modelActive) DrawCollisionModel(context, states, view, proj, color);
 
-#ifdef _COLLISION_LINE_ON
 	// ラインの色を指定している場合
 	SimpleMath::Color c = lineColor;
-	if (c.w != 0.0f) color = lineColor;
+	if (c.w != 0.0f)
+	{
+		color = lineColor;
+		color.w = alpha;
+	}
 
 	// コリジョンラインの描画
 	if (m_lineActive) DrawCollisionLine(context, states, view, proj, color);
-#else
-	UNREFERENCED_PARAMETER(lineColor);
-#endif
 
 	// 登録された表示情報をクリアする
 	m_spheres.clear();
 	m_boxes.clear();
+	m_lineSegments.clear();
+	m_meshes.clear();
 }
 
 // コリジョンモデルの描画
@@ -205,7 +217,6 @@ void DisplayCollision::DrawCollisionModel(ID3D11DeviceContext* context, DirectX:
 	);
 }
 
-#ifdef _COLLISION_LINE_ON
 // コリジョンラインの描画
 void DisplayCollision::DrawCollisionLine(ID3D11DeviceContext* context, DirectX::CommonStates* states, const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& proj, FXMVECTOR color)
 {
@@ -243,6 +254,61 @@ void DisplayCollision::DrawCollisionLine(ID3D11DeviceContext* context, DirectX::
 		DX::Draw(m_primitiveBatch.get(), box, lineColor);
 	}
 
+	// ----- 線分を描画 ----- //
+	for (int i = 0; i < m_lineSegments.size(); i++)
+	{
+		SimpleMath::Color lineColor = color;
+		if (m_lineSegments[i].lineColor.w != 0.0f) lineColor = m_lineSegments[i].lineColor;
+
+		// 線分の描画
+		VertexPositionColor verts[2] = {};
+		XMStoreFloat3(&verts[0].position, m_lineSegments[i].a);
+		XMStoreFloat3(&verts[1].position, m_lineSegments[i].b);
+		XMStoreFloat4(&verts[0].color, lineColor);
+		XMStoreFloat4(&verts[1].color, lineColor);
+		m_primitiveBatch->Draw(D3D_PRIMITIVE_TOPOLOGY_LINELIST, verts, 2);
+	}
+
 	m_primitiveBatch->End();
+
+	// ------------------------------------------------------------------------ //
+	// メッシュコリジョンのラインの描画
+	// ------------------------------------------------------------------------ //
+
+	context->OMSetBlendState(states->AlphaBlend(), nullptr, 0xFFFFFFFF);
+	context->OMSetDepthStencilState(states->DepthRead(), 0);
+	context->RSSetState(states->Wireframe());
+
+	// 入力レイアウトを設定する
+	context->IASetInputLayout(m_meshInputLayout.Get());
+
+	m_meshEffect->SetView(view);
+	m_meshEffect->SetProjection(proj);
+
+	m_meshBatch->Begin();
+
+	// ----- メッシュの描画 ----- //
+	for (int i = 0; i < m_meshes.size(); i++)
+	{
+		SimpleMath::Color lineColor = color;
+		if (m_meshes[i].lineColor.w != 0.0f) lineColor = m_meshes[i].lineColor;
+
+		m_meshEffect->SetColorAndAlpha(lineColor);
+
+		SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_meshes[i].rotate);
+		SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_meshes[i].position);
+		SimpleMath::Matrix world = rotate * trans;
+
+		// エフェクトを適応する
+		m_meshEffect->SetWorld(world);
+		m_meshEffect->Apply(context);
+
+		m_meshBatch->DrawIndexed(
+			D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+			&m_meshes[i].indexes[0], m_meshes[i].indexes.size(),
+			&m_meshes[i].vertexes[0], m_meshes[i].vertexes.size()
+		);
+	}
+
+	m_meshBatch->End();
 }
-#endif
