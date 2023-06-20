@@ -109,6 +109,9 @@ void ModelSampleScene::Render()
 	// グリッドの床を描画
 	//m_gridFloor->Render(context, m_view, m_proj);
 
+	// スカイドーム用のモデルの描画
+	m_skydomeModel->Draw(context, *states, SimpleMath::Matrix::Identity, m_view, m_proj);
+
 	SimpleMath::Matrix rotate, trans, world;
 
 	// 車の描画
@@ -160,6 +163,28 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	// 車モデルの作成
 	m_carModel = Model::CreateFromCMO(device, L"Resources/Models/Car.cmo", *fx);
 
+	// スカイドームモデルの作成
+	m_skydomeModel = Model::CreateFromCMO(device, L"Resources/Models/Skydome.cmo", *fx);
+
+	// スカイドームのライトの影響を受けないように設定する
+	m_skydomeModel->UpdateEffects([](IEffect* effect)
+		{
+			auto lights = dynamic_cast<IEffectLights*>(effect);
+			if (lights)
+			{
+				lights->SetLightEnabled(0, false);
+				lights->SetLightEnabled(1, false);
+				lights->SetLightEnabled(2, false);
+				lights->SetAmbientLightColor(Colors::Black);
+			}
+			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
+			if (basicEffect)
+			{
+				basicEffect->SetEmissiveColor(Colors::White);
+			}
+		}
+	);
+
 	// 衝突判定の表示オブジェクトの作成
 	m_displayCollision = std::make_unique<Imase::DisplayCollision>(device, context);
 }
@@ -171,7 +196,7 @@ void ModelSampleScene::CreateWindowSizeDependentResources()
 	m_proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
 		XMConvertToRadians(45.0f),
 		static_cast<float>(rect.right) / static_cast<float>(rect.bottom),
-		0.1f, 100.0f
+		0.1f, 200.0f
 	);
 }
 

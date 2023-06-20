@@ -54,6 +54,9 @@ private:
 	// 車モデルへのポインタ
 	std::unique_ptr<DirectX::Model> m_carModel;
 
+	// スカイドームモデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_skydomeModel;
+
 private:
 
 	// 衝突判定の表示オブジェクトへのポインタ

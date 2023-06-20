@@ -176,6 +176,9 @@
     <MeshContentTask Include="FBX\Car.fbx">
       <Filter>FBX</Filter>
     </MeshContentTask>
+    <MeshContentTask Include="FBX\Skydome.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
