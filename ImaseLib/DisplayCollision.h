@@ -3,7 +3,7 @@
 //
 // コリジョン表示クラス（デバッグ用）
 //
-// Usage: AddBoundingSphereとAddBoundingBoxとAddBoundingOrientedBoxで登録してください。
+// Usage: AddBoundingVolumeで登録してください。
 //        DrawCollision関数で表示します。登録された情報は描画後クリアされます。
 //        モデル情報の衝突判定用のコリジョン情報の表示などに使用してください。
 //        ※コリジョンの個別の色指定は、描画の高速化のためラインのみ対応しています。
