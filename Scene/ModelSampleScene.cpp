@@ -17,17 +17,6 @@ void ModelSampleScene::Initialize()
 	// デバッグカメラの作成
 	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
 	m_debugCamera = std::make_unique<Imase::DebugCamera>(rect.right, rect.bottom);
-
-	// 衝突判定用オブジェクトの初期値を設定する
-	m_object[0].position = SimpleMath::Vector3(1.0f, 0.0f, 0.0f);
-	m_object[1].position = SimpleMath::Vector3(-1.0f, 0.0f, 0.0f);
-
-	// 衝突判定用メッシュオブジェクトを作成する
-	m_objCollision = std::make_unique<Imase::ObjCollision>(L"Resources/CollisionMeshes/Floor.obj");
-
-	// 線分
-	m_line[0] = SimpleMath::Vector3(0, 1, 0);
-	m_line[1] = SimpleMath::Vector3(0, -1, 0);
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -40,65 +29,34 @@ void ModelSampleScene::Update(float elapsedTime)
 	auto kb = Keyboard::Get().GetState();
 	auto kbTracker = GetUserResources()->GetKeyboardStateTracker();
 
-	// スペースキーが押されたら選択オブジェクトを変更する
-	if (kbTracker->pressed.Space)
+	// ----- 戦車の移動 ----- //
+
+	// 前進
+	if (kb.A)
 	{
-		if (m_selectNo)
-		{
-			m_selectNo = 0;
-		}
-		else
-		{
-			m_selectNo = 1;
-		}
+		m_tankRotate *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(1.0f));
 	}
-
-	// 選択中のオブジェクトを取得する
-	CollisionTest::Object* p = &m_object[m_selectNo];
-
-	SimpleMath::Quaternion q;
-
-	// ピッチ
-	if (kb.W) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitX, XMConvertToRadians(1.0f));
-	if (kb.S) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitX, XMConvertToRadians(-1.0f));
-
-	// ヨー
-	if (kb.Left) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(1.0f));
-	if (kb.Right) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(-1.0f));
-
-	// ロール
-	if (kb.D) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(1.0f));
-	if (kb.A) q *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitZ, XMConvertToRadians(-1.0f));
-
-	// 姿勢に回転を加える
-	p->rotate = q * p->rotate;
-
-	// 前進・後進
-	if (kb.Up) p->position += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 0.1f), p->rotate);
-	if (kb.Down) p->position += SimpleMath::Vector3::Transform(-SimpleMath::Vector3(0.0f, 0.0f, 0.1f), p->rotate);
-
-	// 線分の移動
-	m_line[0].x = p->position.x;
-	m_line[1].x = p->position.x;
-	m_line[0].z = p->position.z;
-	m_line[1].z = p->position.z;
+	// 後進
+	if (kb.D)
+	{
+		m_tankRotate *= SimpleMath::Quaternion::CreateFromAxisAngle(SimpleMath::Vector3::UnitY, XMConvertToRadians(-1.0f));
+	}
+	// 右旋回
+	if (kb.W)
+	{
+		m_tankPosition += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 0.02f), m_tankRotate);
+	}
+	// 左旋回
+	if (kb.S)
+	{
+		m_tankPosition += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, -0.02f), m_tankRotate);
+	}
 }
 
 void ModelSampleScene::Render()
 {
 	auto debugFont = GetUserResources()->GetDebugFont();
 	debugFont->AddString(L"ModelSampleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
-
-	// オブジェクト同士の衝突判定を行う
-	SimpleMath::Vector3 hitPosition;
-	SimpleMath::Vector3 normal;
-	SimpleMath::Matrix tilt;
-	if (m_objCollision->IntersectLineSegment(m_line[0], m_line[1], &hitPosition, &normal))
-	{
-		SimpleMath::Quaternion q = SimpleMath::Quaternion::FromToRotation(SimpleMath::Vector3::UnitY, normal);
-		tilt = SimpleMath::Matrix::CreateFromQuaternion(q);
-		debugFont->AddString(L"Hit!", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight() * 2));
-	}
 
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
 	auto states = GetUserResources()->GetCommonStates();
@@ -107,44 +65,22 @@ void ModelSampleScene::Render()
 	m_view = m_debugCamera->GetCameraMatrix();
 
 	// グリッドの床を描画
-	//m_gridFloor->Render(context, m_view, m_proj);
+	m_gridFloor->Render(context, m_view, m_proj);
 
-	// スカイドーム用のモデルの描画
-	m_skydomeModel->Draw(context, *states, SimpleMath::Matrix::Identity, m_view, m_proj);
-
-	SimpleMath::Matrix rotate, trans, world;
-
-	// 車の描画
-	rotate = SimpleMath::Matrix::CreateFromQuaternion(m_object[0].rotate);
-	trans = SimpleMath::Matrix::CreateTranslation(hitPosition);
-	world = rotate * tilt * trans;
-	m_carModel->Draw(context, *states, world, m_view, m_proj);
-
-	// 軸の描画
-	// 選択中のオブジェクトを取得する
-	CollisionTest::Object* p = &m_object[m_selectNo];
-
-	// 角軸のベクトルを求める
-	SimpleMath::Vector3 forward = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 1.5f), p->rotate);
-	SimpleMath::Vector3 horizontal = SimpleMath::Vector3::Transform(SimpleMath::Vector3(1.5f, 0.0f, 0.0f), p->rotate);
-//	SimpleMath::Vector3 vertical = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 1.5f, 0.0f), p->rotate);
-
-	m_displayCollision->AddLineSegment(p->position, p->position + forward, Colors::Yellow);
-	m_displayCollision->AddLineSegment(p->position, p->position + horizontal, Colors::Red);
-	m_displayCollision->AddLineSegment(m_line[0], m_line[1], Colors::Blue);
-
-	// 衝突判定の登録
-	m_objCollision->AddDisplayCollision(m_displayCollision.get());
-
-	// 衝突判定の表示
-	m_displayCollision->DrawCollision(context, states, m_view, m_proj);
+	// 戦車の描画
+	SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_tankRotate);
+	SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_tankPosition);
+	SimpleMath::Matrix world = rotate * trans;
+	m_tankModel->Draw(context, *states, world, m_view, m_proj, false,[&]()
+		{
+			context->RSSetState(states->CullNone());
+		}
+	);
 }
 
 void ModelSampleScene::Finalize()
 {
 	m_gridFloor.reset();
-	m_carModel.reset();
-	m_displayCollision.reset();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
@@ -160,33 +96,8 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	std::unique_ptr<EffectFactory> fx = std::make_unique<EffectFactory>(device);
 	fx->SetDirectory(L"Resources/Models");
 
-	// 車モデルの作成
-	m_carModel = Model::CreateFromCMO(device, L"Resources/Models/Car.cmo", *fx);
-
-	// スカイドームモデルの作成
-	m_skydomeModel = Model::CreateFromCMO(device, L"Resources/Models/Skydome.cmo", *fx);
-
-	// スカイドームのライトの影響を受けないように設定する
-	m_skydomeModel->UpdateEffects([](IEffect* effect)
-		{
-			auto lights = dynamic_cast<IEffectLights*>(effect);
-			if (lights)
-			{
-				lights->SetLightEnabled(0, false);
-				lights->SetLightEnabled(1, false);
-				lights->SetLightEnabled(2, false);
-				lights->SetAmbientLightColor(Colors::Black);
-			}
-			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
-			if (basicEffect)
-			{
-				basicEffect->SetEmissiveColor(Colors::White);
-			}
-		}
-	);
-
-	// 衝突判定の表示オブジェクトの作成
-	m_displayCollision = std::make_unique<Imase::DisplayCollision>(device, context);
+	// 戦車モデルの作成
+	m_tankModel = Model::CreateFromCMO(device, L"Resources/Models/Tank.cmo", *fx);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()

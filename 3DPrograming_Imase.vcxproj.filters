@@ -85,6 +85,9 @@
     <ClInclude Include="ImaseLib\Collision.h">
       <Filter>ImaseLib</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\Camera.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -128,6 +131,9 @@
     </ClCompile>
     <ClCompile Include="ImaseLib\ObjCollision.cpp">
       <Filter>ImaseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Camera.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +183,9 @@
       <Filter>FBX</Filter>
     </MeshContentTask>
     <MeshContentTask Include="FBX\Skydome.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="FBX\Tank.fbx">
       <Filter>FBX</Filter>
     </MeshContentTask>
   </ItemGroup>

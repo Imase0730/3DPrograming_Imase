@@ -57,6 +57,9 @@ private:
 	// スカイドームモデルへのポインタ
 	std::unique_ptr<DirectX::Model> m_skydomeModel;
 
+	// 戦車モデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_tankModel;
+
 private:
 
 	// 衝突判定の表示オブジェクトへのポインタ
@@ -73,6 +76,15 @@ private:
 
 	// 線分
 	DirectX::SimpleMath::Vector3 m_line[2];
+
+
+private:
+
+	// 戦車の位置
+	DirectX::SimpleMath::Vector3 m_tankPosition;
+
+	// 戦車の回転
+	DirectX::SimpleMath::Quaternion m_tankRotate;
 
 };
 
