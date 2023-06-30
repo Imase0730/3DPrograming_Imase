@@ -8,6 +8,7 @@
 #include "Object.h"
 #include "ImaseLib/ModelCollision.h"
 #include "ImaseLib/ObjCollision.h"
+#include "GameCamera.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -85,6 +86,9 @@ private:
 
 	// íÔ‚Ì‰ñ“]
 	DirectX::SimpleMath::Quaternion m_tankRotate;
+
+	// ƒJƒƒ‰
+	GameCamera m_camera;
 
 };
 

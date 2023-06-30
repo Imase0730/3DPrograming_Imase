@@ -85,7 +85,10 @@
     <ClInclude Include="ImaseLib\Collision.h">
       <Filter>ImaseLib</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\Camera.h">
+    <ClInclude Include="ImaseLib\Camera.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\GameCamera.h">
       <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
@@ -132,7 +135,10 @@
     <ClCompile Include="ImaseLib\ObjCollision.cpp">
       <Filter>ImaseLib</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\Camera.cpp">
+    <ClCompile Include="ImaseLib\Camera.cpp">
+      <Filter>ImaseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\GameCamera.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>

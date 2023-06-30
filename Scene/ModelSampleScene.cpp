@@ -17,6 +17,9 @@ void ModelSampleScene::Initialize()
 	// デバッグカメラの作成
 	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
 	m_debugCamera = std::make_unique<Imase::DebugCamera>(rect.right, rect.bottom);
+
+	// カメラにプレイヤーに位置と回転を渡す
+	m_camera.SetPlayer(m_tankPosition, m_tankRotate);
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -51,6 +54,10 @@ void ModelSampleScene::Update(float elapsedTime)
 	{
 		m_tankPosition += SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, -0.02f), m_tankRotate);
 	}
+
+	// カメラの更新
+	m_camera.Update(elapsedTime);
+
 }
 
 void ModelSampleScene::Render()
@@ -62,7 +69,12 @@ void ModelSampleScene::Render()
 	auto states = GetUserResources()->GetCommonStates();
 
 	// ビュー行列を設定
-	m_view = m_debugCamera->GetCameraMatrix();
+//	m_view = m_debugCamera->GetCameraMatrix();
+	m_view = SimpleMath::Matrix::CreateLookAt(
+		m_camera.GetEyePosition(),
+		m_camera.GetTargetPosition(),
+		SimpleMath::Vector3::UnitY
+	);
 
 	// グリッドの床を描画
 	m_gridFloor->Render(context, m_view, m_proj);
