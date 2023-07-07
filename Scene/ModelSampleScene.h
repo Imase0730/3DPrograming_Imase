@@ -61,6 +61,9 @@ private:
 	// 戦車モデルへのポインタ
 	std::unique_ptr<DirectX::Model> m_tankModel;
 
+	// ボーンモデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_boneModel;
+
 private:
 
 	// 衝突判定の表示オブジェクトへのポインタ
@@ -89,6 +92,19 @@ private:
 
 	// カメラ
 	GameCamera m_camera;
+
+private:
+
+	enum { PARENT, CHILD };
+
+	// ボーンの数
+	static const int BONE_CNT = 2;
+
+	// 各ボーンの初期位置行列
+	DirectX::SimpleMath::Matrix m_initialMatrix[BONE_CNT];
+
+	// 各ボーンの変換行列
+	DirectX::SimpleMath::Matrix m_transformMatrix[BONE_CNT];
 
 };
 

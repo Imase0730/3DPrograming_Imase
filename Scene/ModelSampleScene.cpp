@@ -20,6 +20,11 @@ void ModelSampleScene::Initialize()
 
 	// カメラにプレイヤーに位置と回転を渡す
 	m_camera.SetPlayer(m_tankPosition, m_tankRotate);
+
+	// 各ボーンの初期位置行列を設定
+	m_initialMatrix[PARENT] = SimpleMath::Matrix::Identity;
+	m_initialMatrix[CHILD] = SimpleMath::Matrix::CreateTranslation(0.0f, 1.0f, 0.0f);
+
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -69,25 +74,48 @@ void ModelSampleScene::Render()
 	auto states = GetUserResources()->GetCommonStates();
 
 	// ビュー行列を設定
-//	m_view = m_debugCamera->GetCameraMatrix();
-	m_view = SimpleMath::Matrix::CreateLookAt(
-		m_camera.GetEyePosition(),
-		m_camera.GetTargetPosition(),
-		SimpleMath::Vector3::UnitY
-	);
+	m_view = m_debugCamera->GetCameraMatrix();
+	//m_view = SimpleMath::Matrix::CreateLookAt(
+	//	m_camera.GetEyePosition(),
+	//	m_camera.GetTargetPosition(),
+	//	SimpleMath::Vector3::UnitY
+	//);
 
 	// グリッドの床を描画
 	m_gridFloor->Render(context, m_view, m_proj);
 
-	// 戦車の描画
-	SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_tankRotate);
-	SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_tankPosition);
-	SimpleMath::Matrix world = rotate * trans;
-	m_tankModel->Draw(context, *states, world, m_view, m_proj, false,[&]()
-		{
-			context->RSSetState(states->CullNone());
-		}
-	);
+	//// 戦車の描画
+	//SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_tankRotate);
+	//SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_tankPosition);
+	//SimpleMath::Matrix world = rotate * trans;
+	//m_tankModel->Draw(context, *states, world, m_view, m_proj, false,[&]()
+	//	{
+	//		context->RSSetState(states->CullNone());
+	//	}
+	//);
+
+	auto timer = GetUserResources()->GetStepTimer();
+
+	// ボーンのボーン行列にX軸の回転を加えて回転させる
+	float angle = static_cast<float>(timer->GetTotalSeconds());
+	m_transformMatrix[PARENT] = SimpleMath::Matrix::CreateRotationX(XM_PIDIV2 * sinf(angle));
+	m_transformMatrix[CHILD] = SimpleMath::Matrix::CreateRotationX(XM_PIDIV2 * sinf(angle));
+
+	SimpleMath::Matrix world[BONE_CNT];
+
+	// 各ワールド行列を作成（各ボーンの回転や移動×ボーンの初期位置）
+	world[PARENT] = m_transformMatrix[PARENT] * m_initialMatrix[PARENT];
+	world[CHILD] = m_transformMatrix[CHILD] * m_initialMatrix[CHILD];
+
+	// 子の行列に親の行列を掛ける
+	world[CHILD] = world[CHILD] * world[PARENT];
+
+	// ボーンを描画
+	for (int i = 0; i < BONE_CNT; i++)
+	{
+		m_boneModel->Draw(context, *states, world[i], m_view, m_proj);
+	}
+
 }
 
 void ModelSampleScene::Finalize()
@@ -109,7 +137,10 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	fx->SetDirectory(L"Resources/Models");
 
 	// 戦車モデルの作成
-	m_tankModel = Model::CreateFromCMO(device, L"Resources/Models/Tank.cmo", *fx);
+	//m_tankModel = Model::CreateFromCMO(device, L"Resources/Models/Tank.cmo", *fx);
+
+	// ボーンモデルの作成
+	m_boneModel = Model::CreateFromCMO(device, L"Resources/Models/Bone.cmo", *fx);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
