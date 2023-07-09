@@ -46,4 +46,7 @@ public:
 		m_pPlayerRotate = &rotate;
 	}
 
+	// カメラのタイプの切り替え関数
+	void SetType(Type type) { m_type = type; }
+
 };

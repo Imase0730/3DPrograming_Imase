@@ -37,6 +37,18 @@ void ModelSampleScene::Update(float elapsedTime)
 	auto kb = Keyboard::Get().GetState();
 	auto kbTracker = GetUserResources()->GetKeyboardStateTracker();
 
+	// ----- ƒJƒƒ‰‚ÌØ‚è‘Ö‚¦ ----- //
+
+	if (kbTracker->pressed.Z)
+	{
+		m_camera.SetType(GameCamera::Type::Type_A);
+	}
+
+	if (kbTracker->pressed.X)
+	{
+		m_camera.SetType(GameCamera::Type::Type_B);
+	}
+
 	// ----- íÔ‚ÌˆÚ“® ----- //
 
 	// ‘Oi
