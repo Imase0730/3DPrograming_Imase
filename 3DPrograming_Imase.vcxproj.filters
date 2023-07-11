@@ -91,6 +91,9 @@
     <ClInclude Include="Scene\GameCamera.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="ImaseLib\ModelPart.h">
+      <Filter>ImaseLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -195,6 +198,21 @@
       <Filter>FBX</Filter>
     </MeshContentTask>
     <MeshContentTask Include="FBX\Bone.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="FBX\Leg.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="FBX\Head.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="FBX\Body.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="FBX\Arm_L.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="FBX\Arm_R.fbx">
       <Filter>FBX</Filter>
     </MeshContentTask>
   </ItemGroup>

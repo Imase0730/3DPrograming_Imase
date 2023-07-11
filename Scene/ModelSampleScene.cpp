@@ -21,10 +21,33 @@ void ModelSampleScene::Initialize()
 	// カメラにプレイヤーに位置と回転を渡す
 	m_camera.SetPlayer(m_tankPosition, m_tankRotate);
 
-	// 各ボーンの初期位置行列を設定
-	m_initialMatrix[PARENT] = SimpleMath::Matrix::Identity;
-	m_initialMatrix[CHILD] = SimpleMath::Matrix::CreateTranslation(0.0f, 1.0f, 0.0f);
+	// ロボットの各パーツの作成
+	m_parts[ROOT] = std::make_unique<Imase::ModelPart>();
+	m_parts[HEAD] = std::make_unique<Imase::ModelPart>(m_headModel.get());
+	m_parts[BODY] = std::make_unique<Imase::ModelPart>(m_bodyModel.get());
+	m_parts[LEG] = std::make_unique<Imase::ModelPart>(m_legModel.get());
+	m_parts[ARM_R] = std::make_unique<Imase::ModelPart>(m_armRModel.get());
+	m_parts[ARM_L] = std::make_unique<Imase::ModelPart>(m_armLModel.get());
 
+	// ロボットの各パーツを連結する
+	m_parts[ROOT]->SetChild(m_parts[LEG].get());
+	m_parts[LEG]->SetChild(m_parts[BODY].get());
+	m_parts[BODY]->SetChild(m_parts[HEAD].get());
+		m_parts[HEAD]->SetSibling(m_parts[ARM_R].get());
+	m_parts[ARM_R]->SetSibling(m_parts[ARM_L].get());
+
+	// 各パーツの初期位置行列を作成する
+	m_parts[BODY]->SetInitialMatrix(
+		SimpleMath::Matrix::CreateTranslation(0.0f, 0.32f, 0.0f));
+	m_parts[HEAD]->SetInitialMatrix(
+		SimpleMath::Matrix::CreateTranslation(0.0f, 0.75f, 0.0f));
+	m_parts[ARM_R]->SetInitialMatrix(
+		SimpleMath::Matrix::CreateTranslation(-0.18f, 0.72f, 0.0f));
+	m_parts[ARM_L]->SetInitialMatrix(
+		SimpleMath::Matrix::CreateTranslation( 0.18f, 0.72f, 0.0f));
+
+	// 連結されているパーツの初期位置行列を親の座標系に全て変換する
+	m_parts[ROOT]->SetupMatrix();
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -86,53 +109,41 @@ void ModelSampleScene::Render()
 	auto states = GetUserResources()->GetCommonStates();
 
 	// ビュー行列を設定
-	m_view = m_debugCamera->GetCameraMatrix();
-	//m_view = SimpleMath::Matrix::CreateLookAt(
-	//	m_camera.GetEyePosition(),
-	//	m_camera.GetTargetPosition(),
-	//	SimpleMath::Vector3::UnitY
-	//);
+	//m_view = m_debugCamera->GetCameraMatrix();
+	m_view = SimpleMath::Matrix::CreateLookAt(
+		m_camera.GetEyePosition(),
+		m_camera.GetTargetPosition(),
+		SimpleMath::Vector3::UnitY
+	);
 
 	// グリッドの床を描画
 	m_gridFloor->Render(context, m_view, m_proj);
 
-	//// 戦車の描画
-	//SimpleMath::Matrix rotate = SimpleMath::Matrix::CreateFromQuaternion(m_tankRotate);
-	//SimpleMath::Matrix trans = SimpleMath::Matrix::CreateTranslation(m_tankPosition);
-	//SimpleMath::Matrix world = rotate * trans;
-	//m_tankModel->Draw(context, *states, world, m_view, m_proj, false,[&]()
-	//	{
-	//		context->RSSetState(states->CullNone());
-	//	}
-	//);
+	// ロボットを移動させる
+	SimpleMath::Matrix m = SimpleMath::Matrix::CreateFromQuaternion(m_tankRotate)
+		                 * SimpleMath::Matrix::CreateTranslation(m_tankPosition);
+	m_parts[ROOT]->SetTransformMatrix(m);
 
-	auto timer = GetUserResources()->GetStepTimer();
-
-	// ボーンのボーン行列にX軸の回転を加えて回転させる
-	float angle = static_cast<float>(timer->GetTotalSeconds());
-	m_transformMatrix[PARENT] = SimpleMath::Matrix::CreateRotationX(XM_PIDIV2 * sinf(angle));
-	m_transformMatrix[CHILD] = SimpleMath::Matrix::CreateRotationX(XM_PIDIV2 * sinf(angle));
-
-	SimpleMath::Matrix world[BONE_CNT];
-
-	// 各ワールド行列を作成（各ボーンの回転や移動×ボーンの初期位置）
-	world[PARENT] = m_transformMatrix[PARENT] * m_initialMatrix[PARENT];
-	world[CHILD] = m_transformMatrix[CHILD] * m_initialMatrix[CHILD];
-
-	// 子の行列に親の行列を掛ける
-	world[CHILD] = world[CHILD] * world[PARENT];
-
-	// ボーンを描画
-	for (int i = 0; i < BONE_CNT; i++)
-	{
-		m_boneModel->Draw(context, *states, world[i], m_view, m_proj);
-	}
+	// ロボットの描画
+	m_parts[ROOT]->UpdateMatrix();
+	m_parts[ROOT]->Draw(context, *states, m_view, m_proj, [&]()
+		{
+			// カリングしない
+			context->RSSetState(states->CullNone());
+		}
+	);
 
 }
 
 void ModelSampleScene::Finalize()
 {
 	m_gridFloor.reset();
+
+	m_headModel.reset();
+	m_bodyModel.reset();
+	m_legModel.reset();
+	m_armRModel.reset();
+	m_armLModel.reset();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
@@ -148,11 +159,12 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	std::unique_ptr<EffectFactory> fx = std::make_unique<EffectFactory>(device);
 	fx->SetDirectory(L"Resources/Models");
 
-	// 戦車モデルの作成
-	//m_tankModel = Model::CreateFromCMO(device, L"Resources/Models/Tank.cmo", *fx);
-
-	// ボーンモデルの作成
-	m_boneModel = Model::CreateFromCMO(device, L"Resources/Models/Bone.cmo", *fx);
+	// ロボットの各パーツモデルの作成
+	m_headModel = Model::CreateFromCMO(device, L"Resources/Models/Head.cmo", *fx);
+	m_bodyModel = Model::CreateFromCMO(device, L"Resources/Models/Body.cmo", *fx);
+	m_legModel = Model::CreateFromCMO(device, L"Resources/Models/Leg.cmo", *fx);
+	m_armRModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_R.cmo", *fx);
+	m_armLModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_L.cmo", *fx);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()

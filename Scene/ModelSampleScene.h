@@ -9,6 +9,7 @@
 #include "ImaseLib/ModelCollision.h"
 #include "ImaseLib/ObjCollision.h"
 #include "GameCamera.h"
+#include "ImaseLib/ModelPart.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -105,6 +106,20 @@ private:
 
 	// 各ボーンの変換行列
 	DirectX::SimpleMath::Matrix m_transformMatrix[BONE_CNT];
+
+private:
+
+	// ロボットの各パーツモデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_headModel;
+	std::unique_ptr<DirectX::Model> m_bodyModel;
+	std::unique_ptr<DirectX::Model> m_legModel;
+	std::unique_ptr<DirectX::Model> m_armRModel;
+	std::unique_ptr<DirectX::Model> m_armLModel;
+
+	enum { ROOT, HEAD, BODY, LEG, ARM_R, ARM_L, PARTS_CNT };
+
+	// ロボットのパーツへのポインタ
+	std::unique_ptr<Imase::ModelPart> m_parts[PARTS_CNT];
 
 };
 
