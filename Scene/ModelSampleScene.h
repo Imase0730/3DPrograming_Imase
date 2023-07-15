@@ -67,45 +67,20 @@ private:
 
 private:
 
-	// 衝突判定の表示オブジェクトへのポインタ
-	std::unique_ptr<Imase::DisplayCollision> m_displayCollision;
+	// ロボットの位置
+	DirectX::SimpleMath::Vector3 m_robotPosition;
 
-	// 衝突判定用オブジェクト
-	CollisionTest::Object m_object[2];
+	// ロボットの回転
+	DirectX::SimpleMath::Quaternion m_robotRotate;
 
-	// 選択中のオブジェクトの番号
-	int m_selectNo;
+	// ロボットの上半身の回転
+	DirectX::SimpleMath::Quaternion m_bodyRotate;
 
-	// 衝突判定用メッシュへのポインタ
-	std::unique_ptr<Imase::ObjCollision> m_objCollision;
-
-	// 線分
-	DirectX::SimpleMath::Vector3 m_line[2];
-
-
-private:
-
-	// 戦車の位置
-	DirectX::SimpleMath::Vector3 m_tankPosition;
-
-	// 戦車の回転
-	DirectX::SimpleMath::Quaternion m_tankRotate;
+	// ロボットの左腕の回転
+	DirectX::SimpleMath::Quaternion m_armRotate;
 
 	// カメラ
 	GameCamera m_camera;
-
-private:
-
-	enum { PARENT, CHILD };
-
-	// ボーンの数
-	static const int BONE_CNT = 2;
-
-	// 各ボーンの初期位置行列
-	DirectX::SimpleMath::Matrix m_initialMatrix[BONE_CNT];
-
-	// 各ボーンの変換行列
-	DirectX::SimpleMath::Matrix m_transformMatrix[BONE_CNT];
 
 private:
 
@@ -115,11 +90,24 @@ private:
 	std::unique_ptr<DirectX::Model> m_legModel;
 	std::unique_ptr<DirectX::Model> m_armRModel;
 	std::unique_ptr<DirectX::Model> m_armLModel;
+	std::unique_ptr<DirectX::Model> m_missileModel;
 
-	enum { ROOT, HEAD, BODY, LEG, ARM_R, ARM_L, PARTS_CNT };
+	enum { ROOT, HEAD, BODY, LEG, ARM_R, ARM_L, MISSILE, PARTS_CNT };
 
 	// ロボットのパーツへのポインタ
 	std::unique_ptr<Imase::ModelPart> m_parts[PARTS_CNT];
+
+	// ミサイル発射フラグ
+	bool m_fireFlag;
+
+	// ミサイルの位置
+	DirectX::SimpleMath::Vector3 m_missilePosition;
+
+	// ミサイルの回転
+	DirectX::SimpleMath::Quaternion m_missileRotate;
+
+	// ミサイルの移動距離
+	float m_distance;
 
 };
 

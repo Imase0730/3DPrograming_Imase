@@ -310,6 +310,9 @@
     <MeshContentTask Include="FBX\Leg.fbx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </MeshContentTask>
+    <MeshContentTask Include="FBX\Missile.fbx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </MeshContentTask>
     <MeshContentTask Include="FBX\Pacman.fbx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </MeshContentTask>
