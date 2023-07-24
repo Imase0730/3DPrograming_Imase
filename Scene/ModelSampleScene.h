@@ -109,5 +109,36 @@ private:
 	// ミサイルの移動距離
 	float m_distance;
 
+private:
+
+	// 床モデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_floorModel;
+
+	// 影のテクスチャ
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_shadowTexture;
+
+	// ベーシックエフェクト
+	std::unique_ptr<DirectX::BasicEffect> m_basicEffect;
+
+	// プリミティブバッチ
+	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionTexture>> m_primitiveBatch;
+
+	// 入力レイアウト
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
+
+	// 影の初期化関数
+	void InitializeShadow(ID3D11Device* device, ID3D11DeviceContext* context);
+
+	// 影の終了処理
+	void ResetShadow();
+
+	// 影の描画関数
+	void DrawShadow(
+		ID3D11DeviceContext* context,
+		DirectX::CommonStates* states,
+		DirectX::SimpleMath::Vector3 position,
+		float radius = 0.5f
+	);
+
 };
 

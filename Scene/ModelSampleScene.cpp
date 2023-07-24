@@ -175,7 +175,17 @@ void ModelSampleScene::Render()
 	);
 
 	// グリッドの床を描画
-	m_gridFloor->Render(context, m_view, m_proj);
+	//m_gridFloor->Render(context, m_view, m_proj);
+
+	// 床の描画
+	m_floorModel->Draw(context, *states, SimpleMath::Matrix::Identity, m_view, m_proj,
+		false, [&]()
+		{
+			// テクスチャサンプラの設定
+			ID3D11SamplerState* sampler[] = { states->PointWrap() };
+			context->PSSetSamplers(0, 1, sampler);
+		}
+	);
 
 	// ロボットの上半身の回転
 	m_parts[BODY]->SetTransformMatrix(SimpleMath::Matrix::CreateFromQuaternion(m_bodyRotate));
@@ -187,6 +197,9 @@ void ModelSampleScene::Render()
 	SimpleMath::Matrix m = SimpleMath::Matrix::CreateFromQuaternion(m_robotRotate)
 		                 * SimpleMath::Matrix::CreateTranslation(m_robotPosition);
 	m_parts[ROOT]->SetTransformMatrix(m);
+
+	// 影の描画関数
+	DrawShadow(context, states, m_robotPosition);
 
 	// ロボットの描画
 	m_parts[ROOT]->UpdateMatrix();
@@ -218,6 +231,9 @@ void ModelSampleScene::Finalize()
 	m_armRModel.reset();
 	m_armLModel.reset();
 	m_missileModel.reset();
+
+	// 影の終了処理
+	ResetShadow();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
@@ -240,6 +256,12 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	m_armRModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_R.cmo", *fx);
 	m_armLModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_L.cmo", *fx);
 	m_missileModel = Model::CreateFromCMO(device, L"Resources/Models/Missile.cmo", *fx);
+
+	// 床のモデルの作成
+	m_floorModel = Model::CreateFromCMO(device, L"Resources/Models/Floor.cmo", *fx);
+
+	// 影の初期化関数
+	InitializeShadow(device, context);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
@@ -256,5 +278,102 @@ void ModelSampleScene::CreateWindowSizeDependentResources()
 void ModelSampleScene::OnDeviceLost()
 {
 	Finalize();
+}
+
+// 影の初期化関数
+void ModelSampleScene::InitializeShadow(ID3D11Device* device, ID3D11DeviceContext* context)
+{
+	// ベーシックエフェクトの作成
+	m_basicEffect = std::make_unique<BasicEffect>(device);
+	// ライティング(OFF)
+	m_basicEffect->SetLightingEnabled(false);
+	// 頂点カラー(OFF)
+	m_basicEffect->SetVertexColorEnabled(false);
+	// テクスチャ(ON)
+	m_basicEffect->SetTextureEnabled(true);
+
+	// 入力レイアウトの作成
+	DX::ThrowIfFailed(
+		CreateInputLayoutFromEffect<VertexPositionTexture>(
+			device,
+			m_basicEffect.get(),
+			m_inputLayout.ReleaseAndGetAddressOf()
+		)
+	);
+
+	// プリミティブバッチの作成
+	m_primitiveBatch = std::make_unique<PrimitiveBatch<VertexPositionTexture>>(context);
+
+	// 影のテクスチャの読み込み
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(
+			device,
+			L"Resources/Textures/Shadow.dds",
+			nullptr,
+			m_shadowTexture.ReleaseAndGetAddressOf()
+		)
+	);
+}
+
+// 影の終了処理
+void ModelSampleScene::ResetShadow()
+{
+	m_basicEffect.reset();
+	m_primitiveBatch.reset();
+}
+
+// 影の描画関数
+void ModelSampleScene::DrawShadow(
+	ID3D11DeviceContext* context,
+	DirectX::CommonStates* states,
+	DirectX::SimpleMath::Vector3 position,
+	float radius
+)
+{
+	// エフェクトの設定＆適応
+	m_basicEffect->SetWorld(SimpleMath::Matrix::Identity);
+	m_basicEffect->SetView(m_view);
+	m_basicEffect->SetProjection(m_proj);
+	m_basicEffect->SetTexture(m_shadowTexture.Get());
+	m_basicEffect->Apply(context);
+
+	// 入力レイアウトの設定
+	context->IASetInputLayout(m_inputLayout.Get());
+
+	// テクスチャサンプラの設定
+	ID3D11SamplerState* sampler[] = { states->LinearClamp() };
+	context->PSSetSamplers(0, 1, sampler);
+
+	// アルファブレンドの設定
+	context->OMSetBlendState(states->AlphaBlend(), nullptr, 0xffffffff);
+
+	// 深度バッファの設定
+	context->OMSetDepthStencilState(states->DepthRead(), 0);
+
+	// 影の頂点情報
+	VertexPositionTexture vertexes[] =
+	{
+		VertexPositionTexture(SimpleMath::Vector3::Zero, SimpleMath::Vector2(0.0f, 0.0f)),
+		VertexPositionTexture(SimpleMath::Vector3::Zero, SimpleMath::Vector2(1.0f, 0.0f)),
+		VertexPositionTexture(SimpleMath::Vector3::Zero, SimpleMath::Vector2(0.0f, 1.0f)),
+		VertexPositionTexture(SimpleMath::Vector3::Zero, SimpleMath::Vector2(1.0f, 1.0f)),
+	};
+	// 影のインデックス情報
+	uint16_t indexes[] = { 0, 1, 2, 1, 3, 2 };
+
+	// 影の表示位置の設定
+	vertexes[0].position = SimpleMath::Vector3(-radius, 0.01f, -radius) + position;
+	vertexes[1].position = SimpleMath::Vector3( radius, 0.01f, -radius) + position;
+	vertexes[2].position = SimpleMath::Vector3(-radius, 0.01f,  radius) + position;
+	vertexes[3].position = SimpleMath::Vector3( radius, 0.01f,  radius) + position;
+
+	// 影の描画
+	m_primitiveBatch->Begin();
+	m_primitiveBatch->DrawIndexed(
+		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+		indexes, _countof(indexes),
+		vertexes, _countof(vertexes)
+	);
+	m_primitiveBatch->End();
 }
 
