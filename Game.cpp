@@ -16,7 +16,10 @@ using Microsoft::WRL::ComPtr;
 Game::Game() noexcept(false)
     : m_fullscreen(FALSE)
 {
-    m_deviceResources = std::make_unique<DX::DeviceResources>();
+    m_deviceResources = std::make_unique<DX::DeviceResources>(
+        DXGI_FORMAT_B8G8R8A8_UNORM,
+        DXGI_FORMAT_D24_UNORM_S8_UINT   // ステンシルを使用するため
+    );
     // TODO: Provide parameters for swapchain format, depth/stencil format, and backbuffer count.
     //   Add DX::DeviceResources::c_AllowTearing to opt-in to variable rate displays.
     //   Add DX::DeviceResources::c_EnableHDR for HDR10 display.

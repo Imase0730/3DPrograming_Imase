@@ -181,6 +181,8 @@ void ModelSampleScene::Render()
 	m_floorModel->Draw(context, *states, SimpleMath::Matrix::Identity, m_view, m_proj,
 		false, [&]()
 		{
+			// 深度ステンシルステートの設定
+			context->OMSetDepthStencilState(m_depthStencilState_Floor.Get(), 0);
 			// テクスチャサンプラの設定
 			ID3D11SamplerState* sampler[] = { states->PointWrap() };
 			context->PSSetSamplers(0, 1, sampler);
@@ -199,7 +201,7 @@ void ModelSampleScene::Render()
 	m_parts[ROOT]->SetTransformMatrix(m);
 
 	// 影の描画関数
-	DrawShadow(context, states, m_robotPosition);
+	DrawShadow(context, states, m_robotPosition, 1.0f);
 
 	// ロボットの描画
 	m_parts[ROOT]->UpdateMatrix();
@@ -262,6 +264,48 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// 影の初期化関数
 	InitializeShadow(device, context);
+
+	// ----- 深度ステンシルの作成 ----- //
+
+	D3D11_DEPTH_STENCIL_DESC desc = {};
+
+	// 床（描画時０を１にする）
+	desc.DepthEnable = TRUE;									// 深度テストを行う
+	desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;			// 深度バッファを更新する
+	desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;				// 深度値以下なら更新する
+
+	desc.StencilEnable = TRUE;									// ステンシルテストを行う
+	desc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;		// 0xff
+	desc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;	// 0xff
+
+	// 表面
+	desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;		// ０なら
+	desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT;	// OK　１＋
+	desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;		// NG　何もしない
+	desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;	// NG　何もしない
+
+	desc.BackFace = desc.FrontFace;	// 裏面も同じ
+
+	device->CreateDepthStencilState(&desc, m_depthStencilState_Floor.ReleaseAndGetAddressOf());
+
+	// 床（１のみ描画する）
+//	desc.DepthEnable = TRUE;									// 深度テストを行う
+	desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;			// 深度バッファを更新しない
+//	desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;				// 深度値以下なら更新する
+
+//	desc.StencilEnable = TRUE;									// ステンシルテストを行う
+//	desc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;		// 0xff
+//	desc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;	// 0xff
+
+	// 表面
+//	desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;		// １なら
+	desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;		// OK　何もしない
+//	desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;		// NG　何もしない
+//	desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;	// NG　何もしない
+
+	desc.BackFace = desc.FrontFace;	// 裏面も同じ
+
+	device->CreateDepthStencilState(&desc, m_depthStencilState_Shadow.ReleaseAndGetAddressOf());
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
@@ -347,8 +391,8 @@ void ModelSampleScene::DrawShadow(
 	// アルファブレンドの設定
 	context->OMSetBlendState(states->AlphaBlend(), nullptr, 0xffffffff);
 
-	// 深度バッファの設定
-	context->OMSetDepthStencilState(states->DepthRead(), 0);
+	// 深度ステンシルステートの設定
+	context->OMSetDepthStencilState(m_depthStencilState_Shadow.Get(), 1);
 
 	// 影の頂点情報
 	VertexPositionTexture vertexes[] =

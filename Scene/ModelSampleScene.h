@@ -140,5 +140,11 @@ private:
 		float radius = 0.5f
 	);
 
+	// 深度ステンシルステート（床）
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState_Floor;
+
+	// 深度ステンシルステート（影）
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState_Shadow;
+
 };
 
