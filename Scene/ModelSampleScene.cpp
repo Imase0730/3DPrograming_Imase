@@ -248,19 +248,19 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	m_gridFloor = std::make_unique<Imase::GridFloor>(device, context, states);
 
 	// エフェクトファクトリーの作成
-	std::unique_ptr<EffectFactory> fx = std::make_unique<EffectFactory>(device);
-	fx->SetDirectory(L"Resources/Models");
+	EffectFactory fx(device);
+	fx.SetDirectory(L"Resources/Models");
 
 	// ロボットの各パーツモデルの作成
-	m_headModel = Model::CreateFromCMO(device, L"Resources/Models/Head.cmo", *fx);
-	m_bodyModel = Model::CreateFromCMO(device, L"Resources/Models/Body.cmo", *fx);
-	m_legModel = Model::CreateFromCMO(device, L"Resources/Models/Leg.cmo", *fx);
-	m_armRModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_R.cmo", *fx);
-	m_armLModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_L.cmo", *fx);
-	m_missileModel = Model::CreateFromCMO(device, L"Resources/Models/Missile.cmo", *fx);
+	m_headModel = Model::CreateFromCMO(device, L"Resources/Models/Head.cmo", fx);
+	m_bodyModel = Model::CreateFromCMO(device, L"Resources/Models/Body.cmo", fx);
+	m_legModel = Model::CreateFromCMO(device, L"Resources/Models/Leg.cmo", fx);
+	m_armRModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_R.cmo", fx);
+	m_armLModel = Model::CreateFromCMO(device, L"Resources/Models/Arm_L.cmo", fx);
+	m_missileModel = Model::CreateFromCMO(device, L"Resources/Models/Missile.cmo", fx);
 
 	// 床のモデルの作成
-	m_floorModel = Model::CreateFromCMO(device, L"Resources/Models/Floor.cmo", *fx);
+	m_floorModel = Model::CreateFromCMO(device, L"Resources/Models/Floor.cmo", fx);
 
 	// 影の初期化関数
 	InitializeShadow(device, context);
