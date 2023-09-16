@@ -54,6 +54,10 @@ namespace Imase
 	class Task
 	{
 	private:
+
+		// アクティブ時(true)
+		bool m_active;
+
 		// 描画順序管理用(小さいほど手前に描画される）
 		int m_ot;
 
@@ -63,6 +67,9 @@ namespace Imase
 		// タスクの名前
 		std::string m_name;
 
+		// タスク消去フラグ
+		bool m_killFlag;
+
 	public:
 
 		TaskConnectInfo& GetTaskConnectInfo() { return m_connect; }
@@ -70,7 +77,7 @@ namespace Imase
 	public:
 
 		// コンストラクタ
-		Task() : m_ot(0) {}
+		Task() : m_active(true), m_ot(0) , m_killFlag(false) {}
 
 		// デストラクタ
 		virtual ~Task() {}
@@ -80,6 +87,9 @@ namespace Imase
 		//	オーバーライドして使う関数			//
 		//										//
 		//////////////////////////////////////////
+
+		// 初期化関数（AddTask後に呼び出される）
+		virtual void Initialize() {};
 
 		// 更新関数（falseを返すとタスクが消える）
 		virtual bool Update(float elapsedTime)
@@ -98,6 +108,12 @@ namespace Imase
 
 		// 親タスクの取得関数
 		Task* GetParent() const { return m_connect.GetParent(); }
+
+		// アクティブフラグ設定関数
+		void SetActive(bool flag) { m_active = flag; }
+
+		// アクティブチェック関数
+		bool IsActive() { return m_active; }
 
 		// 描画順設定関数（otの値が0が一番手前）
 		void SetOt(int ot) { this->m_ot = ot; }
@@ -124,6 +140,12 @@ namespace Imase
 				it->UpdateTasks(func);
 			}
 		}
+
+		// タスク消去関数
+		void Kill() { m_killFlag = true; }
+
+		// タスク消去チェック関数
+		bool IsKill() { return m_killFlag; }
 
 	};
 
@@ -185,7 +207,7 @@ namespace Imase
 		virtual void Update(float elapsedTime);
 
 		// 描画関数
-		virtual void Render();
+		virtual void Render(bool clear = true);
 
 		// タスクの生成関数
 		template <class T, class... Args>
@@ -212,6 +234,9 @@ namespace Imase
 
 		// 親の子供リストに追加
 		m_currentTask->GetTaskConnectInfo().AddChild(task);
+
+		// タスク生成後の初期化
+		task->Initialize();
 
 		// タスクに名前が付いていない場合は仮で名前を付ける
 		if (task->GetName().empty())

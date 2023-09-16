@@ -96,6 +96,7 @@ bool ObjCollision::IntersectLineSegment(
 	return false;
 }
 
+// Õ“Ë”»’è‚Ì•\Ž¦‚É“o˜^‚·‚éŠÖ”
 void ObjCollision::AddDisplayCollision(Imase::DisplayCollision* displayCollision, DirectX::FXMVECTOR lineColor) const
 {
 	displayCollision->AddBoundingVolume(m_vertexes, m_indexes, m_position, m_rotation, lineColor);

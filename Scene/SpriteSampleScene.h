@@ -66,9 +66,6 @@ private:
 	// タスクマネージャー
 	Imase::TaskManager m_taskManager;
 
-	// リソースマネージャー
-	Imase::ResourceManager m_resourceManager;
-
 	// 数字を表示するタスクへのポインタ
 	Number* m_number;
 

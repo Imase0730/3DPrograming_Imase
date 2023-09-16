@@ -92,10 +92,7 @@ namespace Imase
 		void SetupMatrix() { SetupMatrix(this, DirectX::SimpleMath::Matrix::Identity); }
 
 		// 連結されているパーツのワールド行列を全て更新する関数
-		void UpdateMatrix(DirectX::SimpleMath::Matrix world = DirectX::SimpleMath::Matrix::Identity)
-		{
-			UpdateMatrix(this, world);
-		}
+		void UpdateMatrix() { UpdateMatrix(this, DirectX::SimpleMath::Matrix::Identity); }
 
 		// 描画関数
 		void Draw(

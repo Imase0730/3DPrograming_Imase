@@ -98,3 +98,5 @@ namespace DX
 #include "SpriteBatch.h"
 #include "DDSTextureLoader.h"
 #include "Model.h"
+#include "Audio.h"
+

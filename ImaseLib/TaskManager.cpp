@@ -55,7 +55,7 @@ void TaskManager::Update(float elapsedTime)
 }
 
 // 描画関数
-void TaskManager::Render()
+void TaskManager::Render(bool clear)
 {
 	// 描画順序管理テーブルに従ってタスクの描画関数を呼び出す
 	for (auto it = m_ot.begin(); it != m_ot.end(); it++)
@@ -63,11 +63,11 @@ void TaskManager::Render()
 		// 実行中のタスクを設定
 		m_currentTask = (*it);
 
-		(*it)->Render();
+		if (!(*it)->IsKill() && (*it)->IsActive()) (*it)->Render();
 	}
 
 	// 描画順序管理テーブルクリア
-	m_ot.clear();
+	if (clear) m_ot.clear();
 
 	// 実行中のタスクをルートタスクに設定
 	m_currentTask = m_rootTask;
@@ -100,17 +100,21 @@ void TaskManager::ChildTaskUpdate(Task* task, float elapsedTime)
 		// 実行中のタスクを設定
 		m_currentTask = (*it);
 
-		// Update関数の戻り値がfalseの場合はタスクを削除する
-		if (!(*it)->Update(elapsedTime))
+		if ((*it)->IsActive())
 		{
-			// タスクの削除
-			DeleteTask(*it);
-			// 子供タスクリストから削除
-			it = childList->erase(it);
-			continue;
+			// Update関数の戻り値がfalseの場合はタスクを削除する
+			if ((*it)->IsKill() || !(*it)->Update(elapsedTime))
+			{
+				// タスクの削除
+				DeleteTask(*it);
+				// 子供タスクリストから削除
+				it = childList->erase(it);
+				continue;
+			}
+			// 描画順序管理テーブルに登録
+			m_ot.insert(*it);
 		}
-		// 描画順序管理テーブルに登録
-		m_ot.insert(*it);
+
 		// 子供のタスクの更新処理を実行する
 		ChildTaskUpdate(*it, elapsedTime);
 		it++;
