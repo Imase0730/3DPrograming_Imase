@@ -4,6 +4,7 @@
   <PropertyGroup Label="UserMacros">
     <dds>DDS\</dds>
     <cmo>CMO\</cmo>
+    <cso>Resources\Shaders\</cso>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup>
@@ -28,6 +29,10 @@
     <MeshContentTask>
       <ContentOutput>$(cmo)%(Filename).cmo</ContentOutput>
     </MeshContentTask>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>$(cso)%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="dds">
@@ -35,6 +40,9 @@
     </BuildMacro>
     <BuildMacro Include="cmo">
       <Value>$(cmo)</Value>
+    </BuildMacro>
+    <BuildMacro Include="cso">
+      <Value>$(cso)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ModelSampleScene.h"
 #include "DebugDraw.h"
+#include "ReadData.h"
 
 using namespace DirectX;
 
@@ -201,14 +202,24 @@ void ModelSampleScene::Render()
 	m_parts[ROOT]->SetTransformMatrix(m);
 
 	// 影の描画関数
-	DrawShadow(context, states, m_robotPosition, 1.0f);
+	//DrawShadow(context, states, m_robotPosition, 1.0f);
+
+	// 影にする行列を作成
+	SimpleMath::Matrix shadowMatrix = SimpleMath::Matrix::CreateShadow(SimpleMath::Vector3(0, 1, 0), SimpleMath::Plane(0, 1, 0, 0));
+	m_parts[ROOT]->SetTransformMatrix(shadowMatrix * m);
 
 	// ロボットの描画
 	m_parts[ROOT]->UpdateMatrix();
 	m_parts[ROOT]->Draw(context, *states, m_view, m_proj, [&]()
 		{
+			// 深度ステンシルの設定
+			context->OMSetDepthStencilState(states->DepthNone(), 0);
+			// ブレンドステートの設定
+			context->OMSetBlendState(states->NonPremultiplied(), nullptr, 0xffffffff);
 			// カリングしない
 			context->RSSetState(states->CullNone());
+			// ピクセルシェーダーの設定
+			context->PSSetShader(m_PS.Get(), nullptr, 0);
 		}
 	);
 
@@ -306,6 +317,12 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	desc.BackFace = desc.FrontFace;	// 裏面も同じ
 
 	device->CreateDepthStencilState(&desc, m_depthStencilState_Shadow.ReleaseAndGetAddressOf());
+
+	// ピクセルシェーダーの作成
+	std::vector<uint8_t> ps = DX::ReadData(L"Resources/Shaders/PixelShader.cso");
+	DX::ThrowIfFailed(
+		device->CreatePixelShader(ps.data(), ps.size(), nullptr, m_PS.ReleaseAndGetAddressOf())
+	);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()

@@ -146,5 +146,10 @@ private:
 	// 深度ステンシルステート（影）
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState_Shadow;
 
+private:
+
+	// ピクセルシェーダー
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS;
+
 };
 
