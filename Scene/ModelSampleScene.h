@@ -151,5 +151,8 @@ private:
 	// ピクセルシェーダー
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS;
 
+	// ピクセルシェーダー（ロボット用）
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS_Robot;
+
 };
 

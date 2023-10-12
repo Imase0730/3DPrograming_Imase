@@ -230,6 +230,8 @@ void ModelSampleScene::Render()
 		{
 			// カリングしない
 			context->RSSetState(states->CullNone());
+			// ピクセルシェーダーの設定
+			context->PSSetShader(m_PS_Robot.Get(), nullptr, 0);
 		}
 	);
 
@@ -332,6 +334,12 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	std::vector<uint8_t> ps = DX::ReadData(L"Resources/Shaders/PixelShader.cso");
 	DX::ThrowIfFailed(
 		device->CreatePixelShader(ps.data(), ps.size(), nullptr, m_PS.ReleaseAndGetAddressOf())
+	);
+
+	// ピクセルシェーダーの作成（ロボット用）
+	std::vector<uint8_t> ps_robot = DX::ReadData(L"Resources/Shaders/PS_Robot.cso");
+	DX::ThrowIfFailed(
+		device->CreatePixelShader(ps_robot.data(), ps_robot.size(), nullptr, m_PS_Robot.ReleaseAndGetAddressOf())
 	);
 }
 
