@@ -205,21 +205,31 @@ void ModelSampleScene::Render()
 	//DrawShadow(context, states, m_robotPosition, 1.0f);
 
 	// 影にする行列を作成
-	SimpleMath::Matrix shadowMatrix = SimpleMath::Matrix::CreateShadow(SimpleMath::Vector3(0, 1, 0), SimpleMath::Plane(0, 1, 0, 0));
+	SimpleMath::Matrix shadowMatrix = SimpleMath::Matrix::CreateShadow(SimpleMath::Vector3(0.0f, 1.0f, 0.0f), SimpleMath::Plane(0.0f, 1.0f, 0.0f, -0.01f));
 	m_parts[ROOT]->SetTransformMatrix(shadowMatrix * m);
 
-	// ロボットの描画
+	// ロボットの影の描画
 	m_parts[ROOT]->UpdateMatrix();
 	m_parts[ROOT]->Draw(context, *states, m_view, m_proj, [&]()
 		{
 			// 深度ステンシルの設定
-			context->OMSetDepthStencilState(states->DepthNone(), 0);
+			context->OMSetDepthStencilState(m_depthStencilState_Shadow.Get(), 1);
 			// ブレンドステートの設定
 			context->OMSetBlendState(states->NonPremultiplied(), nullptr, 0xffffffff);
 			// カリングしない
 			context->RSSetState(states->CullNone());
 			// ピクセルシェーダーの設定
 			context->PSSetShader(m_PS.Get(), nullptr, 0);
+		}
+	);
+
+	// ロボットの描画
+	m_parts[ROOT]->SetTransformMatrix(m);
+	m_parts[ROOT]->UpdateMatrix();
+	m_parts[ROOT]->Draw(context, *states, m_view, m_proj, [&]()
+		{
+			// カリングしない
+			context->RSSetState(states->CullNone());
 		}
 	);
 
@@ -300,7 +310,7 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	device->CreateDepthStencilState(&desc, m_depthStencilState_Floor.ReleaseAndGetAddressOf());
 
 	// 床（１のみ描画する）
-//	desc.DepthEnable = TRUE;									// 深度テストを行う
+	desc.DepthEnable = TRUE;									// 深度テストを行わない
 	desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;			// 深度バッファを更新しない
 //	desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;				// 深度値以下なら更新する
 
@@ -310,7 +320,7 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// 表面
 //	desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;		// １なら
-	desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;		// OK　何もしない
+	desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT;	// OK　１＋
 //	desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;		// NG　何もしない
 //	desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;	// NG　何もしない
 
