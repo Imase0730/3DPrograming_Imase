@@ -168,81 +168,19 @@ void ModelSampleScene::Render()
 	auto states = GetUserResources()->GetCommonStates();
 
 	// ビュー行列を設定
-	//m_view = m_debugCamera->GetCameraMatrix();
-	m_view = SimpleMath::Matrix::CreateLookAt(
-		m_camera.GetEyePosition(),
-		m_camera.GetTargetPosition(),
-		SimpleMath::Vector3::UnitY
-	);
+	m_view = m_debugCamera->GetCameraMatrix();
 
 	// グリッドの床を描画
-	//m_gridFloor->Render(context, m_view, m_proj);
+	m_gridFloor->Render(context, m_view, m_proj);
 
-	// 床の描画
-	m_floorModel->Draw(context, *states, SimpleMath::Matrix::Identity, m_view, m_proj,
-		false, [&]()
+	// トーラスを描画
+	SimpleMath::Matrix world;
+	m_torusModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
 		{
-			// 深度ステンシルステートの設定
-			context->OMSetDepthStencilState(m_depthStencilState_Floor.Get(), 0);
-			// テクスチャサンプラの設定
-			ID3D11SamplerState* sampler[] = { states->PointWrap() };
-			context->PSSetSamplers(0, 1, sampler);
+			// オリジナルピクセルシェーダーの設定
+			context->PSSetShader(m_PS_Torus.Get(), nullptr, 0);
 		}
 	);
-
-	// ロボットの上半身の回転
-	m_parts[BODY]->SetTransformMatrix(SimpleMath::Matrix::CreateFromQuaternion(m_bodyRotate));
-
-	// ロボットの左腕の回転
-	m_parts[ARM_L]->SetTransformMatrix(SimpleMath::Matrix::CreateFromQuaternion(m_armRotate));
-
-	// ロボットを移動させる
-	SimpleMath::Matrix m = SimpleMath::Matrix::CreateFromQuaternion(m_robotRotate)
-		                 * SimpleMath::Matrix::CreateTranslation(m_robotPosition);
-	m_parts[ROOT]->SetTransformMatrix(m);
-
-	// 影の描画関数
-	//DrawShadow(context, states, m_robotPosition, 1.0f);
-
-	// 影にする行列を作成
-	SimpleMath::Matrix shadowMatrix = SimpleMath::Matrix::CreateShadow(SimpleMath::Vector3(0.0f, 1.0f, 0.0f), SimpleMath::Plane(0.0f, 1.0f, 0.0f, -0.01f));
-	m_parts[ROOT]->SetTransformMatrix(shadowMatrix * m);
-
-	// ロボットの影の描画
-	m_parts[ROOT]->UpdateMatrix();
-	m_parts[ROOT]->Draw(context, *states, m_view, m_proj, [&]()
-		{
-			// 深度ステンシルの設定
-			context->OMSetDepthStencilState(m_depthStencilState_Shadow.Get(), 1);
-			// ブレンドステートの設定
-			context->OMSetBlendState(states->NonPremultiplied(), nullptr, 0xffffffff);
-			// カリングしない
-			context->RSSetState(states->CullNone());
-			// ピクセルシェーダーの設定
-			context->PSSetShader(m_PS.Get(), nullptr, 0);
-		}
-	);
-
-	// ロボットの描画
-	m_parts[ROOT]->SetTransformMatrix(m);
-	m_parts[ROOT]->UpdateMatrix();
-	m_parts[ROOT]->Draw(context, *states, m_view, m_proj, [&]()
-		{
-			// カリングしない
-			context->RSSetState(states->CullNone());
-			// ピクセルシェーダーの設定
-			context->PSSetShader(m_PS_Robot.Get(), nullptr, 0);
-		}
-	);
-
-	// ミサイル発射中なら
-	if (m_fireFlag)
-	{
-		// ミサイルを描画する
-		SimpleMath::Matrix world = SimpleMath::Matrix::CreateFromQuaternion(m_missileRotate)
-								 * SimpleMath::Matrix::CreateTranslation(m_missilePosition);
-		m_parts[MISSILE]->GetModel()->Draw(context, *states, world, m_view, m_proj);
-	}
 
 }
 
@@ -341,6 +279,30 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	DX::ThrowIfFailed(
 		device->CreatePixelShader(ps_robot.data(), ps_robot.size(), nullptr, m_PS_Robot.ReleaseAndGetAddressOf())
 	);
+
+	// トーラスモデルの作成
+	m_torusModel = Model::CreateFromCMO(device, L"Resources/Models/Torus.cmo", fx);
+	// トーラスモデルのエフェクトを設定する
+	m_torusModel->UpdateEffects([&](IEffect* effect)
+		{
+			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
+			if (basicEffect)
+			{
+				basicEffect->SetLightingEnabled(false);
+				basicEffect->SetPerPixelLighting(false);
+				basicEffect->SetTextureEnabled(false);
+				basicEffect->SetVertexColorEnabled(false);
+				basicEffect->SetFogEnabled(false);
+			}
+		}
+	);
+
+	// ピクセルシェーダーの作成（トーラス用）
+	std::vector<uint8_t> ps_torus = DX::ReadData(L"Resources/Shaders/PS_Test.cso");
+	DX::ThrowIfFailed(
+		device->CreatePixelShader(ps_torus.data(), ps_torus.size(), nullptr, m_PS_Torus.ReleaseAndGetAddressOf())
+	);
+
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()

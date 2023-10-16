@@ -154,5 +154,11 @@ private:
 	// ピクセルシェーダー（ロボット用）
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS_Robot;
 
+	// トーラスのモデル
+	std::unique_ptr<DirectX::Model> m_torusModel;
+
+	// ピクセルシェーダー（トーラス用）
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS_Torus;
+
 };
 

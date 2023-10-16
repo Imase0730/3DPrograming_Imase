@@ -227,6 +227,9 @@
     <MeshContentTask Include="FBX\Floor.fbx">
       <Filter>FBX</Filter>
     </MeshContentTask>
+    <MeshContentTask Include="FBX\Torus.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -236,6 +239,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\PS_Robot.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PS_Test.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
