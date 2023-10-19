@@ -288,8 +288,8 @@ void ModelSampleScene::CreateDeviceDependentResources()
 			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
 			if (basicEffect)
 			{
-				basicEffect->SetLightingEnabled(false);
-				basicEffect->SetPerPixelLighting(false);
+				basicEffect->SetLightingEnabled(true);
+				basicEffect->SetPerPixelLighting(true);
 				basicEffect->SetTextureEnabled(false);
 				basicEffect->SetVertexColorEnabled(false);
 				basicEffect->SetFogEnabled(false);
