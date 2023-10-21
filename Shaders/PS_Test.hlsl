@@ -29,30 +29,37 @@ cbuffer Parameters : register(b0)
 //	return float4(1.0f, 1.0f, 1.0f, 1.0f);
 //}
 
-struct PSInputPixelLighting
+struct PSInputPixelLightingTx
 {
-    float4 PositionWS : TEXCOORD0;
-    float3 NormalWS   : TEXCOORD1;
-    float4 Diffuse    : COLOR0;
+    float2 TexCoord : TEXCOORD0;
+    float4 PositionWS : TEXCOORD1;
+    float3 NormalWS : TEXCOORD2;
+    float4 Diffuse : COLOR0;
 };
 
 // Pixel shader: pixel lighting.
-float4 PSBasicPixelLighting(PSInputPixelLighting pin) : SV_Target0
+float4 PSBasicPixelLighting(PSInputPixelLightingTx pin) : SV_Target0
 {
+    // テクスチャ色 × Vcが指定されている場合は頂点カラー + アルファ
+    float4 color = Texture.Sample(Sampler, pin.TexCoord) * pin.Diffuse;
+
     // 法線を正規化
-   float3 worldNormal = normalize(pin.NormalWS);
+    float3 worldNormal = normalize(pin.NormalWS);
 
-   // 光の強さを内積から算出する
-   float3 dotL = dot(-LightDirection[0], worldNormal);
-
-   // 表面の場合は１、裏面の場合は0
-   float3 zeroL = step(0, dotL);
-
-   // 裏面の場合は黒になる
-   float3 diffuse = zeroL * dotL;
-
-   // マテリアルのディフューズ色を掛ける
-   diffuse = diffuse * DiffuseColor.rgb;
-
-   return float4(diffuse, 1.0f);
+    // 光の強さを内積から算出する
+    float3 dotL = dot(-LightDirection[0], worldNormal);
+    
+    // 表面の場合は１、裏面の場合は0
+    float3 zeroL = step(0, dotL);
+    
+    // 裏面の場合は黒になる
+    float3 diffuse = zeroL * dotL;
+    
+    // 光の影響 × マテリアルのディフューズ色 ＋ アンビエント色（エミッシブ色も含む）
+    diffuse = diffuse * DiffuseColor.rgb + EmissiveColor;
+    
+    // 光の影響を掛ける
+    color.rgb *= diffuse;
+    
+    return color;
 }

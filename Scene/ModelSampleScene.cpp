@@ -290,7 +290,7 @@ void ModelSampleScene::CreateDeviceDependentResources()
 			{
 				basicEffect->SetLightingEnabled(true);
 				basicEffect->SetPerPixelLighting(true);
-				basicEffect->SetTextureEnabled(false);
+				basicEffect->SetTextureEnabled(true);
 				basicEffect->SetVertexColorEnabled(false);
 				basicEffect->SetFogEnabled(false);
 			}
