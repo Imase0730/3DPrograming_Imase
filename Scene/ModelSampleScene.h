@@ -160,5 +160,19 @@ private:
 	// ピクセルシェーダー（トーラス用）
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS_Torus;
 
+private:
+
+	// 定数バッファの構造体
+	struct ConstantBuffer
+	{
+		DirectX::XMVECTOR torusColor;
+	};
+
+	// トーラスの色
+	DirectX::SimpleMath::Color m_torusColor;
+
+	// 定数バッファへのポインタ
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+
 };
 

@@ -8,6 +8,7 @@ using namespace DirectX;
 ModelSampleScene::ModelSampleScene()
 	: m_fireFlag(false), m_distance(0.0f)
 {
+	m_torusColor = Colors::Red;
 }
 
 void ModelSampleScene::Initialize()
@@ -177,6 +178,23 @@ void ModelSampleScene::Render()
 	SimpleMath::Matrix world;
 	m_torusModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
 		{
+			// 定数バッファを更新
+			D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+			// GPUが定数バッファに対してアクセスを行わないようにする
+			context->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+			// 定数バッファを更新
+			ConstantBuffer cb = { m_torusColor };
+			*static_cast<ConstantBuffer*>(mappedResource.pData) = cb;
+
+			// GPUが定数バッファに対してのアクセスを許可する
+			context->Unmap(m_constantBuffer.Get(), 0);
+
+			// ピクセルシェーダ使用する定数バッファを設定
+			ID3D11Buffer* cbuf_ps[] = { m_constantBuffer.Get() };
+			context->PSSetConstantBuffers(1, 1, cbuf_ps);	// スロット０はDirectXTKが使用しているのでスロット１を使用する
+
 			// オリジナルピクセルシェーダーの設定
 			context->PSSetShader(m_PS_Torus.Get(), nullptr, 0);
 		}
@@ -302,6 +320,17 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	DX::ThrowIfFailed(
 		device->CreatePixelShader(ps_torus.data(), ps_torus.size(), nullptr, m_PS_Torus.ReleaseAndGetAddressOf())
 	);
+
+	// 定数バッファの作成
+	D3D11_BUFFER_DESC bufferDesc = {};
+	size_t size = sizeof(ConstantBuffer) / 16;
+	if (sizeof(ConstantBuffer) % 16) size++;
+	bufferDesc.ByteWidth = static_cast<UINT>(size * 16);	// 確保するサイズ（16の倍数で設定する）
+	// GPU (読み取り専用) と CPU (書き込み専用) の両方からアクセスできるリソース
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPUが内容を変更できるようにする
+	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
 
 }
 

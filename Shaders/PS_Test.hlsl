@@ -24,17 +24,17 @@ cbuffer Parameters : register(b0)
     float4x4 WorldViewProj          : packoffset(c22);
 };
 
-//float4 main() : SV_TARGET
-//{
-//	return float4(1.0f, 1.0f, 1.0f, 1.0f);
-//}
+cbuffer Parameters : register(b1)
+{
+    float4 TorusColor : packoffset(c0);
+};
 
 struct PSInputPixelLightingTx
 {
-    float2 TexCoord : TEXCOORD0;
-    float4 PositionWS : TEXCOORD1;
-    float3 NormalWS : TEXCOORD2;
-    float4 Diffuse : COLOR0;
+    float2 TexCoord     : TEXCOORD0;
+    float4 PositionWS   : TEXCOORD1;
+    float3 NormalWS     : TEXCOORD2;
+    float4 Diffuse      : COLOR0;
 };
 
 // Pixel shader: pixel lighting.
@@ -61,5 +61,24 @@ float4 PSBasicPixelLighting(PSInputPixelLightingTx pin) : SV_Target0
     // 光の影響を掛ける
     color.rgb *= diffuse;
     
-    return color;
+    // 視線ベクトル
+    float3 eyeVector = normalize(EyePosition - pin.PositionWS.xyz);
+
+    // ハーフベクトル
+    float3 halfVector = normalize(eyeVector - LightDirection[0]);
+
+    // スペキュラの影響割合を内積を使い求める
+    float dotH = dot(halfVector, worldNormal);
+
+    // スペキュラパワーを指数として使いハイライトのかかり具合を調整
+    float3 specular = pow(max(dotH, 0) * zeroL, SpecularPower) * dotL;
+
+    // ライトのスペキュラ色とマテリアルのスペキュラ色を反映
+    specular = specular * LightSpecularColor[0] * SpecularColor;
+
+    // スペキュラを加える
+    color.rgb += specular * color.a;
+  
+    return TorusColor;
+//    return color;
 }
