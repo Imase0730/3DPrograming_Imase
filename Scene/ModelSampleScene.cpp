@@ -323,15 +323,15 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// 定数バッファの作成
 	D3D11_BUFFER_DESC bufferDesc = {};
-	size_t size = sizeof(ConstantBuffer) / 16;
-	if (sizeof(ConstantBuffer) % 16) size++;
-	bufferDesc.ByteWidth = static_cast<UINT>(size * 16);	// 確保するサイズ（16の倍数で設定する）
+	//int size = sizeof(ConstantBuffer) / 16;
+	//if (sizeof(ConstantBuffer) % 16) size++;
+	//bufferDesc.ByteWidth = static_cast<UINT>(size * 16);	// 確保するサイズ（16の倍数で設定する）
+	bufferDesc.ByteWidth = static_cast<UINT>(sizeof(ConstantBuffer));	// 確保するサイズ（16の倍数で設定する）
 	// GPU (読み取り専用) と CPU (書き込み専用) の両方からアクセスできるリソース
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPUが内容を変更できるようにする
 	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
-
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
