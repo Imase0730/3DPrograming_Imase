@@ -2,12 +2,17 @@
 #include "ModelSampleScene.h"
 #include "DebugDraw.h"
 #include "ReadData.h"
+#include <iomanip>
 
 using namespace DirectX;
 
 ModelSampleScene::ModelSampleScene()
 	: m_fireFlag(false), m_distance(0.0f)
 {
+	m_cursor = 0;
+	m_att[0] = 0.0f;
+	m_att[1] = 0.0f;
+	m_att[2] = 1.0f;
 	m_lightPosition = SimpleMath::Vector3::Zero;
 }
 
@@ -159,6 +164,42 @@ void ModelSampleScene::Update(float elapsedTime)
 	// カメラの更新
 	m_camera.Update(elapsedTime);
 
+	// 光の減衰係数の数値をキーで変更（調整用）
+	if (kbTracker->pressed.Down)
+	{
+		m_cursor = (m_cursor + 1) % 3;
+	}
+	if (kbTracker->pressed.Up)
+	{
+		m_cursor = (m_cursor + 2) % 3;
+	}
+	if (kb.Left)
+	{
+		m_att[m_cursor] -= 0.01f;
+		if (m_att[m_cursor] < 0.0f) m_att[m_cursor] = 0.0f;
+	}
+	if (kb.Right)
+	{
+		m_att[m_cursor] += 0.01f;
+	}
+
+	// 光の減衰係数を表示
+	for (int i = 0; i < 3; i++)
+	{
+		std::wostringstream oss;
+		if (m_cursor == i)
+		{
+			oss << L">";
+		}
+		else
+		{
+			oss << L" ";
+		}
+		oss << L" att" << i << L" : " << std::fixed << std::setprecision(2) << m_att[i];
+		GetUserResources()->GetDebugFont()->AddString(oss.str().c_str(), SimpleMath::Vector2(0, GetUserResources()->GetDebugFont()->GetFontHeight() * (i + 3)));
+	}
+
+	// ライトの位置を移動させる
 	float time = GetUserResources()->GetStepTimer()->GetTotalSeconds();
 	m_lightPosition = SimpleMath::Vector3(sinf(time) * 2.0f, 1.0f, 0.0f);
 }
@@ -189,9 +230,9 @@ void ModelSampleScene::Render()
 
 			// 定数バッファを更新
 			ConstantBuffer cb = {};
-			cb.att0 = 0.0f;
-			cb.att1 = 0.0f;
-			cb.att2 = 1.0f;
+			cb.att0 = m_att[0];
+			cb.att1 = m_att[1];
+			cb.att2 = m_att[2];
 			cb.lightPosition = m_lightPosition;
 
 			*static_cast<ConstantBuffer*>(mappedResource.pData) = cb;

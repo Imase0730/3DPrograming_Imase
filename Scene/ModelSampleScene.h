@@ -172,11 +172,17 @@ private:
 		DirectX::XMVECTOR lightPosition;	// ライトの位置
 	};
 
+	// 減衰係数
+	float m_att[3];
+
 	// ライトの位置
 	DirectX::SimpleMath::Vector3 m_lightPosition;
 
 	// 定数バッファへのポインタ
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+
+	// 減衰係数デバッグ表示のカーソル位置
+	int m_cursor;
 
 };
 
