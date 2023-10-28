@@ -8,7 +8,7 @@ using namespace DirectX;
 ModelSampleScene::ModelSampleScene()
 	: m_fireFlag(false), m_distance(0.0f)
 {
-	m_torusColor = Colors::Red;
+	m_lightPosition = SimpleMath::Vector3::Zero;
 }
 
 void ModelSampleScene::Initialize()
@@ -158,6 +158,9 @@ void ModelSampleScene::Update(float elapsedTime)
 
 	// カメラの更新
 	m_camera.Update(elapsedTime);
+
+	float time = GetUserResources()->GetStepTimer()->GetTotalSeconds();
+	m_lightPosition = SimpleMath::Vector3(sinf(time) * 2.0f, 1.0f, 0.0f);
 }
 
 void ModelSampleScene::Render()
@@ -172,7 +175,7 @@ void ModelSampleScene::Render()
 	m_view = m_debugCamera->GetCameraMatrix();
 
 	// グリッドの床を描画
-	m_gridFloor->Render(context, m_view, m_proj);
+	//m_gridFloor->Render(context, m_view, m_proj);
 
 	// トーラスを描画
 	SimpleMath::Matrix world;
@@ -185,7 +188,12 @@ void ModelSampleScene::Render()
 			context->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
 			// 定数バッファを更新
-			ConstantBuffer cb = { m_torusColor };
+			ConstantBuffer cb = {};
+			cb.att0 = 0.0f;
+			cb.att1 = 0.0f;
+			cb.att2 = 1.0f;
+			cb.lightPosition = m_lightPosition;
+
 			*static_cast<ConstantBuffer*>(mappedResource.pData) = cb;
 
 			// GPUが定数バッファに対してのアクセスを許可する
@@ -194,6 +202,17 @@ void ModelSampleScene::Render()
 			// ピクセルシェーダ使用する定数バッファを設定
 			ID3D11Buffer* cbuf_ps[] = { m_constantBuffer.Get() };
 			context->PSSetConstantBuffers(1, 1, cbuf_ps);	// スロット０はDirectXTKが使用しているのでスロット１を使用する
+
+			// オリジナルピクセルシェーダーの設定
+			context->PSSetShader(m_PS_Torus.Get(), nullptr, 0);
+		}
+	);
+
+	// 床の描画
+	m_floorModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
+		{
+			ID3D11SamplerState* samplers[] = { states->PointWrap() };
+			context->PSSetSamplers(0, 1, samplers);
 
 			// オリジナルピクセルシェーダーの設定
 			context->PSSetShader(m_PS_Torus.Get(), nullptr, 0);
@@ -240,6 +259,20 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// 床のモデルの作成
 	m_floorModel = Model::CreateFromCMO(device, L"Resources/Models/Floor.cmo", fx);
+	// 床のモデルのエフェクトを設定する
+	m_floorModel->UpdateEffects([&](IEffect* effect)
+		{
+			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
+			if (basicEffect)
+			{
+				basicEffect->SetLightingEnabled(true);
+				basicEffect->SetPerPixelLighting(true);
+				basicEffect->SetTextureEnabled(true);
+				basicEffect->SetVertexColorEnabled(false);
+				basicEffect->SetFogEnabled(false);
+			}
+		}
+	);
 
 	// 影の初期化関数
 	InitializeShadow(device, context);

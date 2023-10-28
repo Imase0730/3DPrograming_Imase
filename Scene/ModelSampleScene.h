@@ -165,11 +165,15 @@ private:
 	// 定数バッファの構造体
 	struct ConstantBuffer
 	{
-		DirectX::XMVECTOR torusColor;
+		float att0;		// 一定減衰係数
+		float att1;		// 線形減衰係数
+		float att2;		// 次減衰係数
+		float padding1;
+		DirectX::XMVECTOR lightPosition;	// ライトの位置
 	};
 
-	// トーラスの色
-	DirectX::SimpleMath::Color m_torusColor;
+	// ライトの位置
+	DirectX::SimpleMath::Vector3 m_lightPosition;
 
 	// 定数バッファへのポインタ
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
