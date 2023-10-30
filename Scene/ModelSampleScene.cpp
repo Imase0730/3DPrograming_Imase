@@ -200,7 +200,7 @@ void ModelSampleScene::Update(float elapsedTime)
 	}
 
 	// ƒ‰ƒCƒg‚ÌˆÊ’u‚ðˆÚ“®‚³‚¹‚é
-	float time = GetUserResources()->GetStepTimer()->GetTotalSeconds();
+	float time = static_cast<float>(GetUserResources()->GetStepTimer()->GetTotalSeconds());
 	m_lightPosition = SimpleMath::Vector3(sinf(time) * 2.0f, 1.0f, 0.0f);
 }
 
