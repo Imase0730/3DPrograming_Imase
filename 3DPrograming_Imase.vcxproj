@@ -207,6 +207,7 @@
     <ClInclude Include="ImaseLib\TaskManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ReadData.h" />
+    <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="Scene\GameCamera.h" />
     <ClInclude Include="Scene\ModelSampleScene.h" />
     <ClInclude Include="Scene\Object.h" />
@@ -243,6 +244,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="Scene\GameCamera.cpp" />
     <ClCompile Include="Scene\ModelSampleScene.cpp" />
     <ClCompile Include="Scene\SpriteSampleScene.cpp">

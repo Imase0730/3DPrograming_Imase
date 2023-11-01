@@ -97,6 +97,9 @@
     <ClInclude Include="ImaseLib\ModelPart.h">
       <Filter>ImaseLib</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTexture.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -146,6 +149,9 @@
     </ClCompile>
     <ClCompile Include="Scene\GameCamera.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTexture.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

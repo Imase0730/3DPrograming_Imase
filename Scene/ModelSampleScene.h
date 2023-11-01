@@ -53,106 +53,12 @@ private:
 	// グリッドの床へのポインタ
 	std::unique_ptr<Imase::GridFloor> m_gridFloor;
 
-	// 車モデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_carModel;
-
-	// スカイドームモデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_skydomeModel;
-
-	// 戦車モデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_tankModel;
-
-	// ボーンモデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_boneModel;
-
-private:
-
-	// ロボットの位置
-	DirectX::SimpleMath::Vector3 m_robotPosition;
-
-	// ロボットの回転
-	DirectX::SimpleMath::Quaternion m_robotRotate;
-
-	// ロボットの上半身の回転
-	DirectX::SimpleMath::Quaternion m_bodyRotate;
-
-	// ロボットの左腕の回転
-	DirectX::SimpleMath::Quaternion m_armRotate;
-
-	// カメラ
-	GameCamera m_camera;
-
-private:
-
-	// ロボットの各パーツモデルへのポインタ
-	std::unique_ptr<DirectX::Model> m_headModel;
-	std::unique_ptr<DirectX::Model> m_bodyModel;
-	std::unique_ptr<DirectX::Model> m_legModel;
-	std::unique_ptr<DirectX::Model> m_armRModel;
-	std::unique_ptr<DirectX::Model> m_armLModel;
-	std::unique_ptr<DirectX::Model> m_missileModel;
-
-	enum { ROOT, HEAD, BODY, LEG, ARM_R, ARM_L, MISSILE, PARTS_CNT };
-
-	// ロボットのパーツへのポインタ
-	std::unique_ptr<Imase::ModelPart> m_parts[PARTS_CNT];
-
-	// ミサイル発射フラグ
-	bool m_fireFlag;
-
-	// ミサイルの位置
-	DirectX::SimpleMath::Vector3 m_missilePosition;
-
-	// ミサイルの回転
-	DirectX::SimpleMath::Quaternion m_missileRotate;
-
-	// ミサイルの移動距離
-	float m_distance;
-
 private:
 
 	// 床モデルへのポインタ
 	std::unique_ptr<DirectX::Model> m_floorModel;
 
-	// 影のテクスチャ
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_shadowTexture;
-
-	// ベーシックエフェクト
-	std::unique_ptr<DirectX::BasicEffect> m_basicEffect;
-
-	// プリミティブバッチ
-	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionTexture>> m_primitiveBatch;
-
-	// 入力レイアウト
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-
-	// 影の初期化関数
-	void InitializeShadow(ID3D11Device* device, ID3D11DeviceContext* context);
-
-	// 影の終了処理
-	void ResetShadow();
-
-	// 影の描画関数
-	void DrawShadow(
-		ID3D11DeviceContext* context,
-		DirectX::CommonStates* states,
-		DirectX::SimpleMath::Vector3 position,
-		float radius = 0.5f
-	);
-
-	// 深度ステンシルステート（床）
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState_Floor;
-
-	// 深度ステンシルステート（影）
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState_Shadow;
-
 private:
-
-	// ピクセルシェーダー
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS;
-
-	// ピクセルシェーダー（ロボット用）
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS_Robot;
 
 	// トーラスのモデル
 	std::unique_ptr<DirectX::Model> m_torusModel;
@@ -184,5 +90,9 @@ private:
 	// 減衰係数デバッグ表示のカーソル位置
 	int m_cursor;
 
+private:
+
+	// シーンの描画
+	void DrawScene(const D3D11_VIEWPORT& vp, const DirectX::SimpleMath::Matrix& view);
 };
 
