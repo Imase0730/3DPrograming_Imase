@@ -126,7 +126,10 @@ void ModelSampleScene::Render()
 
 void ModelSampleScene::Finalize()
 {
-	m_gridFloor.reset();
+	//m_gridFloor.reset();
+	m_floorModel.reset();
+	m_torusModel.reset();
+	m_constantBuffer.Reset();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
