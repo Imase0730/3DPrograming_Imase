@@ -99,4 +99,5 @@ namespace DX
 #include "DDSTextureLoader.h"
 #include "Model.h"
 #include "Audio.h"
+#include "PostProcess.h"
 

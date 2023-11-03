@@ -10,6 +10,7 @@
 #include "ImaseLib/ObjCollision.h"
 #include "GameCamera.h"
 #include "ImaseLib/ModelPart.h"
+#include "RenderTexture.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -94,5 +95,17 @@ private:
 
 	// シーンの描画
 	void DrawScene(const D3D11_VIEWPORT& vp, const DirectX::SimpleMath::Matrix& view);
+
+private:
+
+	// レンダーテクスチャ(シーン全体)
+	std::unique_ptr<DX::RenderTexture> m_sceneRT;
+
+	// スプライトバッチ
+	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+
+	// ベーシックポストプロセス
+	std::unique_ptr<DirectX::BasicPostProcess> m_basicPostProcess;
+
 };
 

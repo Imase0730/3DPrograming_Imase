@@ -82,6 +82,19 @@ void ModelSampleScene::Render()
 
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
 
+	auto renderTarget = GetUserResources()->GetDeviceResources()->GetRenderTargetView();
+	auto depthStencil = GetUserResources()->GetDeviceResources()->GetDepthStencilView();
+	auto sceneRTV = m_sceneRT->GetRenderTargetView();
+	auto sceneSRV = m_sceneRT->GetShaderResourceView();
+
+	// -------------------------------------------------------------------------- //
+	// レンダーターゲットを変更（sceneRT）
+	// -------------------------------------------------------------------------- //
+	context->ClearRenderTargetView(m_sceneRT->GetRenderTargetView(), Colors::Black);
+	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	context->OMSetRenderTargets(1, &sceneRTV, depthStencil);
+	// -------------------------------------------------------------------------- //
+
 	// グリッドの床を描画
 	//m_gridFloor->Render(context, m_view, m_proj);
 
@@ -119,9 +132,26 @@ void ModelSampleScene::Render()
 	m_view = SimpleMath::Matrix::CreateLookAt(SimpleMath::Vector3(0.0f, 2.0f, 2.0f), SimpleMath::Vector3(0.0f, 0.0f, 0.0f), SimpleMath::Vector3::UnitY);
 	DrawScene(vp, m_view);
 
-	// ビューポートを元に戻す
+	// -------------------------------------------------------------------------- //
+	// レンダーターゲットとビューポートを元に戻す
+	// -------------------------------------------------------------------------- //
+	context->ClearRenderTargetView(renderTarget, Colors::Black);
+	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 	auto const viewport = GetUserResources()->GetDeviceResources()->GetScreenViewport();
 	context->RSSetViewports(1, &viewport);
+	// -------------------------------------------------------------------------- //
+
+	// セピア調に色を変えるポストプロセスを実行する
+	m_basicPostProcess->SetEffect(BasicPostProcess::Sepia);
+	m_basicPostProcess->SetSourceTexture(sceneSRV);
+	m_basicPostProcess->Process(context);
+
+	//m_spriteBatch->Begin();
+
+	//m_spriteBatch->Draw(sceneSRV, SimpleMath::Vector2::Zero);
+
+	//m_spriteBatch->End();
 }
 
 void ModelSampleScene::Finalize()
@@ -135,7 +165,7 @@ void ModelSampleScene::Finalize()
 void ModelSampleScene::CreateDeviceDependentResources()
 {
 	auto device = GetUserResources()->GetDeviceResources()->GetD3DDevice();
-	//auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
+	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
 	//auto states = GetUserResources()->GetCommonStates();
 
 	//// グリッドの床を作成
@@ -193,6 +223,18 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPUが内容を変更できるようにする
 	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+
+	// レンダーテクスチャの作成（シーン全体）
+	m_sceneRT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
+	m_sceneRT->SetDevice(device);
+	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
+	m_sceneRT->SetWindow(rect);
+
+	// スプライトバッチの作成
+	m_spriteBatch = std::make_unique<SpriteBatch>(context);
+
+	// ベーシックポストプロセス
+	m_basicPostProcess = std::make_unique<BasicPostProcess>(device);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
