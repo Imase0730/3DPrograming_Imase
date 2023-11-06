@@ -84,15 +84,15 @@ void ModelSampleScene::Render()
 
 	auto renderTarget = GetUserResources()->GetDeviceResources()->GetRenderTargetView();
 	auto depthStencil = GetUserResources()->GetDeviceResources()->GetDepthStencilView();
-	auto sceneRTV = m_sceneRT->GetRenderTargetView();
-	auto sceneSRV = m_sceneRT->GetShaderResourceView();
+	auto offscreenRTV = m_offscreenRT->GetRenderTargetView();
+	auto offscreenSRV = m_offscreenRT->GetShaderResourceView();
 
 	// -------------------------------------------------------------------------- //
 	// レンダーターゲットを変更（sceneRT）
 	// -------------------------------------------------------------------------- //
-	context->ClearRenderTargetView(m_sceneRT->GetRenderTargetView(), Colors::Black);
+	context->ClearRenderTargetView(m_offscreenRT->GetRenderTargetView(), Colors::Black);
 	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	context->OMSetRenderTargets(1, &sceneRTV, depthStencil);
+	context->OMSetRenderTargets(1, &offscreenRTV, depthStencil);
 	// -------------------------------------------------------------------------- //
 
 	// グリッドの床を描画
@@ -144,7 +144,7 @@ void ModelSampleScene::Render()
 
 	// セピア調に色を変えるポストプロセスを実行する
 	m_basicPostProcess->SetEffect(BasicPostProcess::Sepia);
-	m_basicPostProcess->SetSourceTexture(sceneSRV);
+	m_basicPostProcess->SetSourceTexture(offscreenSRV);
 	m_basicPostProcess->Process(context);
 
 	//m_spriteBatch->Begin();
@@ -225,10 +225,10 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
 
 	// レンダーテクスチャの作成（シーン全体）
-	m_sceneRT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
-	m_sceneRT->SetDevice(device);
+	m_offscreenRT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
+	m_offscreenRT->SetDevice(device);
 	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
-	m_sceneRT->SetWindow(rect);
+	m_offscreenRT->SetWindow(rect);
 
 	// スプライトバッチの作成
 	m_spriteBatch = std::make_unique<SpriteBatch>(context);

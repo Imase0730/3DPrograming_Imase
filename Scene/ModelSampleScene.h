@@ -99,7 +99,7 @@ private:
 private:
 
 	// レンダーテクスチャ(シーン全体)
-	std::unique_ptr<DX::RenderTexture> m_sceneRT;
+	std::unique_ptr<DX::RenderTexture> m_offscreenRT;
 
 	// スプライトバッチ
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
