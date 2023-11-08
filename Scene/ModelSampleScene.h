@@ -101,11 +101,18 @@ private:
 	// レンダーテクスチャ(シーン全体)
 	std::unique_ptr<DX::RenderTexture> m_offscreenRT;
 
+	// レンダーテクスチャ(ブルーム用)
+	std::unique_ptr<DX::RenderTexture> m_blur1RT;
+	std::unique_ptr<DX::RenderTexture> m_blur2RT;
+
 	// スプライトバッチ
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 
 	// ベーシックポストプロセス
 	std::unique_ptr<DirectX::BasicPostProcess> m_basicPostProcess;
+
+	// デュアルポストプロセス
+	std::unique_ptr<DirectX::DualPostProcess> m_dualPostProcess;
 
 };
 

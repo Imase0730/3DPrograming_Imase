@@ -88,7 +88,7 @@ void ModelSampleScene::Render()
 	auto offscreenSRV = m_offscreenRT->GetShaderResourceView();
 
 	// -------------------------------------------------------------------------- //
-	// レンダーターゲットを変更（sceneRT）
+	// レンダーターゲットを変更（offscreenRT）
 	// -------------------------------------------------------------------------- //
 	context->ClearRenderTargetView(m_offscreenRT->GetRenderTargetView(), Colors::Black);
 	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -133,6 +133,54 @@ void ModelSampleScene::Render()
 	DrawScene(vp, m_view);
 
 	// -------------------------------------------------------------------------- //
+	// Pass1 offscreen → blur1 明るい部分を抽出する
+	// -------------------------------------------------------------------------- //
+	auto blur1RTV = m_blur1RT->GetRenderTargetView();
+	auto blur1SRV = m_blur1RT->GetShaderResourceView();
+
+	// レンダーターゲットをblur1に変更する
+	context->OMSetRenderTargets(1, &blur1RTV, nullptr);
+
+	// ビューポートを変更する
+	D3D11_VIEWPORT vp_blur =
+	{ 0.0f, 0.0f, rect.right / 2.0f, rect.bottom / 2.0f, 0.0f, 1.0f };
+	context->RSSetViewports(1, &vp_blur);
+
+	m_basicPostProcess->SetEffect(BasicPostProcess::BloomExtract);
+	m_basicPostProcess->SetBloomExtractParameter(0.25f);
+	m_basicPostProcess->SetSourceTexture(offscreenSRV);
+	m_basicPostProcess->Process(context);
+
+	// -------------------------------------------------------------------------- //
+	// Pass2 blur1 → blur2 横にぼかす
+	// -------------------------------------------------------------------------- //
+	auto blur2RTV = m_blur2RT->GetRenderTargetView();
+	auto blur2SRV = m_blur2RT->GetShaderResourceView();
+
+	// レンダーターゲットをblur2に変更する
+	context->OMSetRenderTargets(1, &blur2RTV, nullptr);
+
+	m_basicPostProcess->SetEffect(BasicPostProcess::BloomBlur);
+	m_basicPostProcess->SetBloomBlurParameters(true, 4.0f, 1.0f);
+	m_basicPostProcess->SetSourceTexture(blur1SRV);
+	m_basicPostProcess->Process(context);
+
+	// -------------------------------------------------------------------------- //
+	// Pass3 blur2 → blur1 縦にぼかす
+	// -------------------------------------------------------------------------- //
+
+	// レンダーターゲットをblur1に変更する
+	context->OMSetRenderTargets(1, &blur1RTV, nullptr);
+
+	m_basicPostProcess->SetEffect(BasicPostProcess::BloomBlur);
+	m_basicPostProcess->SetBloomBlurParameters(false, 4.0f, 1.0f);
+	m_basicPostProcess->SetSourceTexture(blur2SRV);
+	m_basicPostProcess->Process(context);
+
+	// -------------------------------------------------------------------------- //
+	// Pass4 offscreen + blur1 → バックバッファ
+	// -------------------------------------------------------------------------- //
+	// -------------------------------------------------------------------------- //
 	// レンダーターゲットとビューポートを元に戻す
 	// -------------------------------------------------------------------------- //
 	context->ClearRenderTargetView(renderTarget, Colors::Black);
@@ -141,15 +189,15 @@ void ModelSampleScene::Render()
 	auto const viewport = GetUserResources()->GetDeviceResources()->GetScreenViewport();
 	context->RSSetViewports(1, &viewport);
 	// -------------------------------------------------------------------------- //
-
-	// セピア調に色を変えるポストプロセスを実行する
-	m_basicPostProcess->SetEffect(BasicPostProcess::Sepia);
-	m_basicPostProcess->SetSourceTexture(offscreenSRV);
-	m_basicPostProcess->Process(context);
+	m_dualPostProcess->SetEffect(DualPostProcess::BloomCombine);
+	m_dualPostProcess->SetBloomCombineParameters(1.25f, 1.0f, 0.0f, 1.0f);
+	m_dualPostProcess->SetSourceTexture(offscreenSRV);
+	m_dualPostProcess->SetSourceTexture2(blur1SRV);
+	m_dualPostProcess->Process(context);
 
 	//m_spriteBatch->Begin();
 
-	//m_spriteBatch->Draw(sceneSRV, SimpleMath::Vector2::Zero);
+	//m_spriteBatch->Draw(blur1SRV, SimpleMath::Vector2::Zero);
 
 	//m_spriteBatch->End();
 }
@@ -230,11 +278,26 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
 	m_offscreenRT->SetWindow(rect);
 
+	// レンダーテクスチャの作成（ブルーム用）
+	rect.right /= 2;
+	rect.bottom /= 2;
+
+	m_blur1RT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
+	m_blur1RT->SetDevice(device);
+	m_blur1RT->SetWindow(rect);
+
+	m_blur2RT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
+	m_blur2RT->SetDevice(device);
+	m_blur2RT->SetWindow(rect);
+
 	// スプライトバッチの作成
 	m_spriteBatch = std::make_unique<SpriteBatch>(context);
 
-	// ベーシックポストプロセス
+	// ベーシックポストプロセスの作成
 	m_basicPostProcess = std::make_unique<BasicPostProcess>(device);
+
+	// デュアルポストプロセスの作成
+	m_dualPostProcess = std::make_unique<DualPostProcess>(device);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
