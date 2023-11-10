@@ -11,6 +11,7 @@
 #include "GameCamera.h"
 #include "ImaseLib/ModelPart.h"
 #include "RenderTexture.h"
+#include "ImaseLib/DepthStencil.h"
 
 class ModelSampleScene : public Imase::Scene<UserResources>
 {
@@ -113,6 +114,17 @@ private:
 
 	// デュアルポストプロセス
 	std::unique_ptr<DirectX::DualPostProcess> m_dualPostProcess;
+
+private:
+	
+	// シャドウマップのサイズ
+	static const int SHADOWMAP_SIZE = 512;
+
+	// シャドウマップ用（レンダーテクスチャ）
+	std::unique_ptr<DX::RenderTexture> m_shadowMapRT;
+
+	// シャドウマップ用（デプスステンシル）
+	std::unique_ptr<Imase::DepthStencil> m_shadowMapDS;
 
 };
 

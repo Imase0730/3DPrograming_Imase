@@ -195,6 +195,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="ImaseLib\Camera.h" />
     <ClInclude Include="ImaseLib\Collision.h" />
+    <ClInclude Include="ImaseLib\DepthStencil.h" />
     <ClInclude Include="ImaseLib\ModelCollision.h" />
     <ClInclude Include="ImaseLib\DebugCamera.h" />
     <ClInclude Include="ImaseLib\DebugFont.h" />
@@ -222,6 +223,7 @@
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="ImaseLib\Camera.cpp" />
+    <ClCompile Include="ImaseLib\DepthStencil.cpp" />
     <ClCompile Include="ImaseLib\ModelCollision.cpp" />
     <ClCompile Include="ImaseLib\DebugCamera.cpp" />
     <ClCompile Include="ImaseLib\DebugFont.cpp">
@@ -340,6 +342,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\SM_Common.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelShader.hlsl">
@@ -360,6 +363,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PSBasicPixelLighting</EntryPointName>
+    </FxCompile>
+    <FxCompile Include="Shaders\SM_PS_Depth.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\SM_VS_Depth.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

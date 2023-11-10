@@ -34,45 +34,6 @@ void ModelSampleScene::Update(float elapsedTime)
 
 	// デバッグカメラの更新
 	m_debugCamera->Update();
-
-	// 光の減衰係数の数値をキーで変更（調整用）
-	if (kbTracker->pressed.Down)
-	{
-		m_cursor = (m_cursor + 1) % 3;
-	}
-	if (kbTracker->pressed.Up)
-	{
-		m_cursor = (m_cursor + 2) % 3;
-	}
-	if (kb.Left)
-	{
-		m_att[m_cursor] -= 0.01f;
-		if (m_att[m_cursor] < 0.0f) m_att[m_cursor] = 0.0f;
-	}
-	if (kb.Right)
-	{
-		m_att[m_cursor] += 0.01f;
-	}
-
-	// 光の減衰係数を表示
-	for (int i = 0; i < 3; i++)
-	{
-		std::wostringstream oss;
-		if (m_cursor == i)
-		{
-			oss << L">";
-		}
-		else
-		{
-			oss << L" ";
-		}
-		oss << L" att" << i << L" : " << std::fixed << std::setprecision(2) << m_att[i];
-		GetUserResources()->GetDebugFont()->AddString(oss.str().c_str(), SimpleMath::Vector2(0, GetUserResources()->GetDebugFont()->GetFontHeight() * (i + 3)));
-	}
-
-	// ライトの位置を移動させる
-	float time = static_cast<float>(GetUserResources()->GetStepTimer()->GetTotalSeconds());
-	m_lightPosition = SimpleMath::Vector3(sinf(time) * 2.0f, 1.0f, 0.0f);
 }
 
 void ModelSampleScene::Render()
@@ -81,125 +42,62 @@ void ModelSampleScene::Render()
 	debugFont->AddString(L"ModelSampleScene", SimpleMath::Vector2(0.0f, debugFont->GetFontHeight()));
 
 	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
-
-	auto renderTarget = GetUserResources()->GetDeviceResources()->GetRenderTargetView();
-	auto depthStencil = GetUserResources()->GetDeviceResources()->GetDepthStencilView();
-	auto offscreenRTV = m_offscreenRT->GetRenderTargetView();
-	auto offscreenSRV = m_offscreenRT->GetShaderResourceView();
+	auto states = GetUserResources()->GetCommonStates();
 
 	// -------------------------------------------------------------------------- //
-	// レンダーターゲットを変更（offscreenRT）
-	// -------------------------------------------------------------------------- //
-	context->ClearRenderTargetView(m_offscreenRT->GetRenderTargetView(), Colors::Black);
-	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	context->OMSetRenderTargets(1, &offscreenRTV, depthStencil);
+	// Pass1 シャドウマップの作成
 	// -------------------------------------------------------------------------- //
 
-	// グリッドの床を描画
-	//m_gridFloor->Render(context, m_view, m_proj);
+	auto rtv = m_shadowMapRT->GetRenderTargetView();
+	auto srv = m_shadowMapRT->GetShaderResourceView();
+	auto dsv = m_shadowMapDS->GetDepthStencilView();
 
-	// 画面のサイズを取得
-	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
+	// レンダーターゲットを変更（shadowMapRT）
+	context->ClearRenderTargetView(rtv, SimpleMath::Color(1.0f, 1.0f, 1.0f, 1.0f));
+	context->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	context->OMSetRenderTargets(1, &rtv, dsv);
 
-	// ビュー行列を設定
+	// ビューポートを設定
+	D3D11_VIEWPORT vp = { 0.0f, 0.0f, SHADOWMAP_SIZE, SHADOWMAP_SIZE, 0.0f, 1.0f };
+	context->RSSetViewports(1, &vp);
+
 	m_view = m_debugCamera->GetCameraMatrix();
 
-	// 左上のシーンの描画
-	D3D11_VIEWPORT vp = {};
-	vp.Width = rect.right / 2.0f;
-	vp.Height = rect.bottom / 2.0f;
-	vp.TopLeftX = 0.0f;
-	vp.TopLeftY = 0.0f;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	DrawScene(vp, m_view);
+	SimpleMath::Matrix world;
 
-	// 右上のシーンの描画
-	vp.TopLeftX = rect.right / 2.0f;
-	vp.TopLeftY = 0.0f;
-	m_view = SimpleMath::Matrix::CreateLookAt(SimpleMath::Vector3(0.0f, 4.0f, 5.0f), SimpleMath::Vector3(0.0f, 0.0f, 0.0f), SimpleMath::Vector3::UnitY);
-	DrawScene(vp, m_view);
+	// 床の描画
+	m_floorModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
+		{
+			ID3D11SamplerState* samplers[] = { states->PointWrap() };
+			context->PSSetSamplers(0, 1, samplers);
+		}
+	);
 
-	// 左下のシーンの描画
-	vp.TopLeftX = 0.0f;
-	vp.TopLeftY = rect.bottom / 2.0f;
-	m_view = SimpleMath::Matrix::CreateLookAt(SimpleMath::Vector3(5.0f, 10.0f, 5.0f), SimpleMath::Vector3(0.0f, 0.0f, 0.0f), SimpleMath::Vector3::UnitY);
-	DrawScene(vp, m_view);
+	world = SimpleMath::Matrix::CreateTranslation(0.0f, 1.0f, 0.0f);
 
-	// 右下のシーンの描画
-	vp.TopLeftX = rect.right / 2.0f;
-	vp.TopLeftY = rect.bottom / 2.0f;
-	m_view = SimpleMath::Matrix::CreateLookAt(SimpleMath::Vector3(0.0f, 2.0f, 2.0f), SimpleMath::Vector3(0.0f, 0.0f, 0.0f), SimpleMath::Vector3::UnitY);
-	DrawScene(vp, m_view);
+	// トーラスの描画
+	m_torusModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
+		{
+		}
+	);
 
-	// -------------------------------------------------------------------------- //
-	// Pass1 offscreen → blur1 明るい部分を抽出する
-	// -------------------------------------------------------------------------- //
-	auto blur1RTV = m_blur1RT->GetRenderTargetView();
-	auto blur1SRV = m_blur1RT->GetShaderResourceView();
-
-	// レンダーターゲットをblur1に変更する
-	context->OMSetRenderTargets(1, &blur1RTV, nullptr);
-
-	// ビューポートを変更する
-	D3D11_VIEWPORT vp_blur =
-	{ 0.0f, 0.0f, rect.right / 2.0f, rect.bottom / 2.0f, 0.0f, 1.0f };
-	context->RSSetViewports(1, &vp_blur);
-
-	m_basicPostProcess->SetEffect(BasicPostProcess::BloomExtract);
-	m_basicPostProcess->SetBloomExtractParameter(0.25f);
-	m_basicPostProcess->SetSourceTexture(offscreenSRV);
-	m_basicPostProcess->Process(context);
-
-	// -------------------------------------------------------------------------- //
-	// Pass2 blur1 → blur2 横にぼかす
-	// -------------------------------------------------------------------------- //
-	auto blur2RTV = m_blur2RT->GetRenderTargetView();
-	auto blur2SRV = m_blur2RT->GetShaderResourceView();
-
-	// レンダーターゲットをblur2に変更する
-	context->OMSetRenderTargets(1, &blur2RTV, nullptr);
-
-	m_basicPostProcess->SetEffect(BasicPostProcess::BloomBlur);
-	m_basicPostProcess->SetBloomBlurParameters(true, 4.0f, 1.0f);
-	m_basicPostProcess->SetSourceTexture(blur1SRV);
-	m_basicPostProcess->Process(context);
-
-	// -------------------------------------------------------------------------- //
-	// Pass3 blur2 → blur1 縦にぼかす
-	// -------------------------------------------------------------------------- //
-
-	// レンダーターゲットをblur1に変更する
-	context->OMSetRenderTargets(1, &blur1RTV, nullptr);
-
-	m_basicPostProcess->SetEffect(BasicPostProcess::BloomBlur);
-	m_basicPostProcess->SetBloomBlurParameters(false, 4.0f, 1.0f);
-	m_basicPostProcess->SetSourceTexture(blur2SRV);
-	m_basicPostProcess->Process(context);
-
-	// -------------------------------------------------------------------------- //
-	// Pass4 offscreen + blur1 → バックバッファ
-	// -------------------------------------------------------------------------- //
 	// -------------------------------------------------------------------------- //
 	// レンダーターゲットとビューポートを元に戻す
 	// -------------------------------------------------------------------------- //
-	context->ClearRenderTargetView(renderTarget, Colors::Black);
+	auto renderTarget = GetUserResources()->GetDeviceResources()->GetRenderTargetView();
+	auto depthStencil = GetUserResources()->GetDeviceResources()->GetDepthStencilView();
+
+	context->ClearRenderTargetView(renderTarget, Colors::CornflowerBlue);
 	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 	auto const viewport = GetUserResources()->GetDeviceResources()->GetScreenViewport();
 	context->RSSetViewports(1, &viewport);
-	// -------------------------------------------------------------------------- //
-	m_dualPostProcess->SetEffect(DualPostProcess::BloomCombine);
-	m_dualPostProcess->SetBloomCombineParameters(1.25f, 1.0f, 0.0f, 1.0f);
-	m_dualPostProcess->SetSourceTexture(offscreenSRV);
-	m_dualPostProcess->SetSourceTexture2(blur1SRV);
-	m_dualPostProcess->Process(context);
 
-	//m_spriteBatch->Begin();
+	m_spriteBatch->Begin();
 
-	//m_spriteBatch->Draw(blur1SRV, SimpleMath::Vector2::Zero);
+	m_spriteBatch->Draw(srv, SimpleMath::Vector2::Zero);
 
-	//m_spriteBatch->End();
+	m_spriteBatch->End();
 }
 
 void ModelSampleScene::Finalize()
@@ -225,79 +123,39 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// 床のモデルの作成
 	m_floorModel = Model::CreateFromCMO(device, L"Resources/Models/Floor.cmo", fx);
-	// 床のモデルのエフェクトを設定する
-	m_floorModel->UpdateEffects([&](IEffect* effect)
-		{
-			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
-			if (basicEffect)
-			{
-				basicEffect->SetLightingEnabled(true);
-				basicEffect->SetPerPixelLighting(true);
-				basicEffect->SetTextureEnabled(true);
-				basicEffect->SetVertexColorEnabled(false);
-				basicEffect->SetFogEnabled(false);
-			}
-		}
-	);
 
 	// トーラスモデルの作成
 	m_torusModel = Model::CreateFromCMO(device, L"Resources/Models/Torus.cmo", fx);
-	// トーラスモデルのエフェクトを設定する
-	m_torusModel->UpdateEffects([&](IEffect* effect)
-		{
-			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
-			if (basicEffect)
-			{
-				basicEffect->SetLightingEnabled(true);
-				basicEffect->SetPerPixelLighting(true);
-				basicEffect->SetTextureEnabled(true);
-				basicEffect->SetVertexColorEnabled(false);
-				basicEffect->SetFogEnabled(false);
-			}
-		}
-	);
 
-	// ピクセルシェーダーの作成（トーラス用）
-	std::vector<uint8_t> ps_torus = DX::ReadData(L"Resources/Shaders/PS_Test.cso");
-	DX::ThrowIfFailed(
-		device->CreatePixelShader(ps_torus.data(), ps_torus.size(), nullptr, m_PS_Torus.ReleaseAndGetAddressOf())
-	);
+	//// ピクセルシェーダーの作成（トーラス用）
+	//std::vector<uint8_t> ps_torus = DX::ReadData(L"Resources/Shaders/PS_Test.cso");
+	//DX::ThrowIfFailed(
+	//	device->CreatePixelShader(ps_torus.data(), ps_torus.size(), nullptr, m_PS_Torus.ReleaseAndGetAddressOf())
+	//);
 
-	// 定数バッファの作成
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.ByteWidth = static_cast<UINT>(sizeof(ConstantBuffer));	// 確保するサイズ（16の倍数で設定する）
-	// GPU (読み取り専用) と CPU (書き込み専用) の両方からアクセスできるリソース
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPUが内容を変更できるようにする
-	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+	//// 定数バッファの作成
+	//D3D11_BUFFER_DESC bufferDesc = {};
+	//bufferDesc.ByteWidth = static_cast<UINT>(sizeof(ConstantBuffer));	// 確保するサイズ（16の倍数で設定する）
+	//// GPU (読み取り専用) と CPU (書き込み専用) の両方からアクセスできるリソース
+	//bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	//bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
+	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPUが内容を変更できるようにする
+	//DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
 
-	// レンダーテクスチャの作成（シーン全体）
-	m_offscreenRT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
-	m_offscreenRT->SetDevice(device);
-	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
-	m_offscreenRT->SetWindow(rect);
+	RECT rect = { 0, 0, SHADOWMAP_SIZE, SHADOWMAP_SIZE };
 
-	// レンダーテクスチャの作成（ブルーム用）
-	rect.right /= 2;
-	rect.bottom /= 2;
+	// レンダーテクスチャの作成（シャドウマップ用）
+	m_shadowMapRT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_R32_FLOAT);
+	m_shadowMapRT->SetDevice(device);
+	m_shadowMapRT->SetWindow(rect);
 
-	m_blur1RT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
-	m_blur1RT->SetDevice(device);
-	m_blur1RT->SetWindow(rect);
-
-	m_blur2RT = std::make_unique<DX::RenderTexture>(DXGI_FORMAT_B8G8R8A8_UNORM);
-	m_blur2RT->SetDevice(device);
-	m_blur2RT->SetWindow(rect);
+	// デプスステンシルの作成（シャドウマップ用）
+	m_shadowMapDS = std::make_unique<Imase::DepthStencil>(DXGI_FORMAT_D32_FLOAT);
+	m_shadowMapDS->SetDevice(device);
+	m_shadowMapDS->SetWindow(rect);
 
 	// スプライトバッチの作成
 	m_spriteBatch = std::make_unique<SpriteBatch>(context);
-
-	// ベーシックポストプロセスの作成
-	m_basicPostProcess = std::make_unique<BasicPostProcess>(device);
-
-	// デュアルポストプロセスの作成
-	m_dualPostProcess = std::make_unique<DualPostProcess>(device);
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
