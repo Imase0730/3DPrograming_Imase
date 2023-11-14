@@ -70,35 +70,6 @@ private:
 
 private:
 
-	// 定数バッファの構造体
-	struct ConstantBuffer
-	{
-		float att0;		// 一定減衰係数
-		float att1;		// 線形減衰係数
-		float att2;		// 次減衰係数
-		float padding1;
-		DirectX::XMVECTOR lightPosition;	// ライトの位置
-	};
-
-	// 減衰係数
-	float m_att[3];
-
-	// ライトの位置
-	DirectX::SimpleMath::Vector3 m_lightPosition;
-
-	// 定数バッファへのポインタ
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
-
-	// 減衰係数デバッグ表示のカーソル位置
-	int m_cursor;
-
-private:
-
-	// シーンの描画
-	void DrawScene(const D3D11_VIEWPORT& vp, const DirectX::SimpleMath::Matrix& view);
-
-private:
-
 	// レンダーテクスチャ(シーン全体)
 	std::unique_ptr<DX::RenderTexture> m_offscreenRT;
 
@@ -125,6 +96,18 @@ private:
 
 	// シャドウマップ用（デプスステンシル）
 	std::unique_ptr<Imase::DepthStencil> m_shadowMapDS;
+
+	// 頂点シェーダー
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_VS_Depth;
+
+	// ピクセルシェーダー
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS_Depth;
+
+	// ライトの位置
+	DirectX::SimpleMath::Vector3 m_lightPosition;
+
+	// ライトの回転
+	DirectX::SimpleMath::Quaternion m_lightRotate;
 
 };
 

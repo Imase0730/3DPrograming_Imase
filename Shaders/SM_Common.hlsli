@@ -23,3 +23,12 @@ cbuffer Parameters : register(b0)
     float3x3 WorldInverseTranspose  : packoffset(c19);
     float4x4 WorldViewProj          : packoffset(c22);
 };
+
+// 追加する定数バッファ
+cbuffer Parameters : register(b1)
+{
+    float4x4 LightViewProj  : packoffset(c0);
+    float4 LightPos         : packoffset(c4);
+    float4 LightAmbient     : packoffset(c5);
+};
+

@@ -8,11 +8,12 @@ using namespace DirectX;
 
 ModelSampleScene::ModelSampleScene()
 {
-	m_cursor = 0;
-	m_att[0] = 0.0f;
-	m_att[1] = 0.0f;
-	m_att[2] = 1.0f;
-	m_lightPosition = SimpleMath::Vector3::Zero;
+	// ライトの位置
+	m_lightPosition = SimpleMath::Vector3(5.0f, 5.0f, 0.0f);
+
+	// ライトの回転
+	m_lightRotate = SimpleMath::Quaternion::CreateFromYawPitchRoll(
+		XMConvertToRadians(-90.0f), XMConvertToRadians(45.0f), 0.0f);
 }
 
 void ModelSampleScene::Initialize()
@@ -63,21 +64,37 @@ void ModelSampleScene::Render()
 
 	m_view = m_debugCamera->GetCameraMatrix();
 
-	SimpleMath::Matrix world;
+	// ------------------------------------------------ //
+	// ライト空間のビュー行列と射影行列を作成する
+	// ------------------------------------------------ //
 
-	// 床の描画
-	m_floorModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
-		{
-			ID3D11SamplerState* samplers[] = { states->PointWrap() };
-			context->PSSetSamplers(0, 1, samplers);
-		}
+	// ライトの方向
+	SimpleMath::Vector3 lightDir = SimpleMath::Vector3::Transform(SimpleMath::Vector3(0.0f, 0.0f, 1.0f), m_lightRotate);
+
+	// ビュー行列を作成
+	SimpleMath::Matrix view = SimpleMath::Matrix::CreateLookAt(
+		m_lightPosition,
+		m_lightPosition + lightDir,
+		SimpleMath::Vector3::UnitY
 	);
+
+	// 射影行列を作成
+	SimpleMath::Matrix proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
+		XMConvertToRadians(90.0f), 1.0f, 0.1f, 100.0f);
+	
+	// ------------------------------------------------ //
+	// 影になるモデルを描画する
+	// ------------------------------------------------ //
+
+	SimpleMath::Matrix world;
 
 	world = SimpleMath::Matrix::CreateTranslation(0.0f, 1.0f, 0.0f);
 
 	// トーラスの描画
-	m_torusModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
+	m_torusModel->Draw(context, *states, world, view, proj, false, [&]()
 		{
+			context->VSSetShader(m_VS_Depth.Get(), nullptr, 0);
+			context->PSSetShader(m_PS_Depth.Get(), nullptr, 0);
 		}
 	);
 
@@ -93,6 +110,14 @@ void ModelSampleScene::Render()
 	auto const viewport = GetUserResources()->GetDeviceResources()->GetScreenViewport();
 	context->RSSetViewports(1, &viewport);
 
+	// 床の描画
+	m_floorModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
+		{
+			ID3D11SamplerState* samplers[] = { states->PointWrap() };
+			context->PSSetSamplers(0, 1, samplers);
+		}
+	);
+
 	m_spriteBatch->Begin();
 
 	m_spriteBatch->Draw(srv, SimpleMath::Vector2::Zero);
@@ -105,7 +130,6 @@ void ModelSampleScene::Finalize()
 	//m_gridFloor.reset();
 	m_floorModel.reset();
 	m_torusModel.reset();
-	m_constantBuffer.Reset();
 }
 
 void ModelSampleScene::CreateDeviceDependentResources()
@@ -156,6 +180,19 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// スプライトバッチの作成
 	m_spriteBatch = std::make_unique<SpriteBatch>(context);
+
+	// 頂点シェーダーの作成（シャドウマップ用）
+	std::vector<uint8_t> vs_depth = DX::ReadData(L"Resources/Shaders/SM_VS_Depth.cso");
+	DX::ThrowIfFailed(
+		device->CreateVertexShader(vs_depth.data(), vs_depth.size(), nullptr, m_VS_Depth.ReleaseAndGetAddressOf())
+	);
+
+	// ピクセルシェーダーの作成（シャドウマップ用）
+	std::vector<uint8_t> ps_depth = DX::ReadData(L"Resources/Shaders/SM_PS_Depth.cso");
+	DX::ThrowIfFailed(
+		device->CreatePixelShader(ps_depth.data(), ps_depth.size(), nullptr, m_PS_Depth.ReleaseAndGetAddressOf())
+	);
+
 }
 
 void ModelSampleScene::CreateWindowSizeDependentResources()
@@ -174,55 +211,4 @@ void ModelSampleScene::OnDeviceLost()
 	Finalize();
 }
 
-// シーンの描画
-void ModelSampleScene::DrawScene(const D3D11_VIEWPORT& vp, const DirectX::SimpleMath::Matrix& view)
-{
-	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
-	auto states = GetUserResources()->GetCommonStates();
-
-	// ビューポートの設定
-	context->RSSetViewports(1, &vp);
-
-	// トーラスを描画
-	SimpleMath::Matrix world;
-	m_torusModel->Draw(context, *states, world, view, m_proj, false, [&]()
-		{
-			// 定数バッファを更新
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-
-			// GPUが定数バッファに対してアクセスを行わないようにする
-			context->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-			// 定数バッファを更新
-			ConstantBuffer cb = {};
-			cb.att0 = m_att[0];
-			cb.att1 = m_att[1];
-			cb.att2 = m_att[2];
-			cb.lightPosition = m_lightPosition;
-
-			*static_cast<ConstantBuffer*>(mappedResource.pData) = cb;
-
-			// GPUが定数バッファに対してのアクセスを許可する
-			context->Unmap(m_constantBuffer.Get(), 0);
-
-			// ピクセルシェーダ使用する定数バッファを設定
-			ID3D11Buffer* cbuf_ps[] = { m_constantBuffer.Get() };
-			context->PSSetConstantBuffers(1, 1, cbuf_ps);	// スロット０はDirectXTKが使用しているのでスロット１を使用する
-
-			// オリジナルピクセルシェーダーの設定
-			context->PSSetShader(m_PS_Torus.Get(), nullptr, 0);
-		}
-	);
-
-	// 床の描画
-	m_floorModel->Draw(context, *states, world, view, m_proj, false, [&]()
-		{
-			ID3D11SamplerState* samplers[] = { states->PointWrap() };
-			context->PSSetSamplers(0, 1, samplers);
-
-			// オリジナルピクセルシェーダーの設定
-			context->PSSetShader(m_PS_Torus.Get(), nullptr, 0);
-		}
-	);
-}
 
