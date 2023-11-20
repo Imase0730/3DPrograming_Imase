@@ -110,6 +110,8 @@ void ModelSampleScene::Render()
 	auto const viewport = GetUserResources()->GetDeviceResources()->GetScreenViewport();
 	context->RSSetViewports(1, &viewport);
 
+	world = SimpleMath::Matrix::CreateTranslation(0.0f, 0.0f, 0.0f);
+
 	// °‚Ì•`‰æ
 	m_floorModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
 		{
