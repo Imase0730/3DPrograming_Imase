@@ -30,32 +30,39 @@ DebugCamera::DebugCamera(int windowWidth, int windowHeight)
 //--------------------------------------------------------------------------------------
 // 更新
 //--------------------------------------------------------------------------------------
-void DebugCamera::Update()
+void DebugCamera::Update(const DirectX::Mouse::ButtonStateTracker& tracker)
 {
-	auto state = Mouse::Get().GetState();
+	auto state = tracker.GetLastState();
 
-	// 相対モードなら何もしない
-	if (state.positionMode == Mouse::MODE_RELATIVE) return;
-
-	m_tracker.Update(state);
-
-	// マウスの左ボタンが押された
-	if (m_tracker.leftButton == Mouse::ButtonStateTracker::ButtonState::PRESSED)
+	// 相対モードなら
+	if (state.positionMode == Mouse::Mode::MODE_RELATIVE)
 	{
-		// マウスの座標を取得
-		m_x = state.x;
-		m_y = state.y;
+		// マウスの左ボタンが押されていたらカメラを移動させる
+		if (state.leftButton)
+		{
+			RelativeMotion(state.x, state.y);
+		}
 	}
-	else if (m_tracker.leftButton == Mouse::ButtonStateTracker::ButtonState::RELEASED)
+	else
 	{
-		// 現在の回転を保存
-		m_xAngle = m_xTmp;
-		m_yAngle = m_yTmp;
-	}
-	// マウスのボタンが押されていたらカメラを移動させる
-	if (state.leftButton)
-	{
-		Motion(state.x, state.y);
+		// マウスの左ボタンが押された
+		if (tracker.leftButton == Mouse::ButtonStateTracker::ButtonState::PRESSED)
+		{
+			// マウスの座標を取得
+			m_x = state.x;
+			m_y = state.y;
+		}
+		else if (tracker.leftButton == Mouse::ButtonStateTracker::ButtonState::RELEASED)
+		{
+			// 現在の回転を保存
+			m_xAngle = m_xTmp;
+			m_yAngle = m_yTmp;
+		}
+		// マウスの左ボタンが押されていたらカメラを移動させる
+		if (state.leftButton)
+		{
+			AbsoluteMotion(state.x, state.y);
+		}
 	}
 
 	// マウスのフォイール値を取得
@@ -86,10 +93,7 @@ void DebugCamera::Update()
 	m_view = SimpleMath::Matrix::CreateLookAt(eye, target, up);
 }
 
-//--------------------------------------------------------------------------------------
-// 行列の生成
-//--------------------------------------------------------------------------------------
-void DebugCamera::Motion(int x, int y)
+void DebugCamera::AbsoluteMotion(int x, int y)
 {
 	// マウスポインタの位置のドラッグ開始位置からの変位 (相対値)
 	float dx = (x - m_x) * m_sx;
@@ -105,6 +109,21 @@ void DebugCamera::Motion(int x, int y)
 		m_xTmp = m_xAngle + xAngle;
 		m_yTmp = m_yAngle + yAngle;
 	}
+}
+
+void DebugCamera::RelativeMotion(int x, int y)
+{
+	// マウスポインタの位置のドラッグ開始位置からの変位 (相対値)
+	float dx = x * m_sx;
+	float dy = y * m_sy;
+
+	// Ｙ軸の回転
+	float yAngle = dx * XM_PI;
+	// Ｘ軸の回転
+	float xAngle = dy * XM_PI;
+
+	m_xTmp += xAngle;
+	m_yTmp += yAngle;
 }
 
 DirectX::SimpleMath::Matrix DebugCamera::GetCameraMatrix()

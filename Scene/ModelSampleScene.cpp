@@ -30,11 +30,13 @@ void ModelSampleScene::Update(float elapsedTime)
 {
 	elapsedTime;
 
-	auto kb = Keyboard::Get().GetState();
 	auto kbTracker = GetUserResources()->GetKeyboardStateTracker();
+	auto kb = kbTracker->GetLastState();
+	auto mouseTracker = GetUserResources()->GetMouseStateTracker();
+	auto mouseState = mouseTracker->GetLastState();
 
 	// デバッグカメラの更新
-	m_debugCamera->Update();
+	m_debugCamera->Update(*mouseTracker);
 }
 
 void ModelSampleScene::Render()

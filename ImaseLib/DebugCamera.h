@@ -50,7 +50,8 @@ namespace Imase
 
 	private:
 
-		void Motion(int x, int y);
+		void AbsoluteMotion(int x, int y);
+		void RelativeMotion(int x, int y);
 
 	public:
 		/// <summary>
@@ -64,7 +65,7 @@ namespace Imase
 		/// デバッグカメラの更新
 		/// </summary>
 		/// <param name="mouse">マウスオブジェクトへのポインタ</param>
-		void Update();
+		void Update(const DirectX::Mouse::ButtonStateTracker& tracker);
 
 		/// <summary>
 		/// デバッグカメラのビュー行列の取得関数
