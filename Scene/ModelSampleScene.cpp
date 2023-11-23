@@ -81,7 +81,28 @@ void ModelSampleScene::Render()
 	// 射影行列を作成
 	SimpleMath::Matrix proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
 		XMConvertToRadians(90.0f), 1.0f, 0.1f, 100.0f);
-	
+
+	// -------------------------------------------------------------------------- //
+	// 定数バッファを更新
+	// -------------------------------------------------------------------------- //
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	// GPUが定数バッファに対してアクセスを行わないようにする
+	context->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	// 定数バッファを更新
+	ConstantBuffer cb = {};
+	SimpleMath::Matrix m = view * proj;
+	cb.lightViewProj = XMMatrixTranspose(m);
+	cb.lightPosition = m_lightPosition;
+	cb.lightAmbient = SimpleMath::Color(0.3f, 0.3f, 0.3f);
+
+	*static_cast<ConstantBuffer*>(mappedResource.pData) = cb;
+
+	// GPUが定数バッファに対してのアクセスを許可する
+	context->Unmap(m_constantBuffer.Get(), 0);
+
 	// ------------------------------------------------ //
 	// 影になるモデルを描画する
 	// ------------------------------------------------ //
@@ -115,16 +136,41 @@ void ModelSampleScene::Render()
 	// 床の描画
 	m_floorModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
 		{
-			ID3D11SamplerState* samplers[] = { states->PointWrap() };
-			context->PSSetSamplers(0, 1, samplers);
+			// 定数バッファの設定
+			ID3D11Buffer* cbuf[] = { m_constantBuffer.Get() };
+			context->VSSetConstantBuffers(1, 1, cbuf);
+			context->PSSetConstantBuffers(1, 1, cbuf);
+
+			// 作成したシャドウマップをリソースとして設定
+			context->PSSetShaderResources(1, 1, &srv);
+
+			// テクスチャサンプラーの設定
+			ID3D11SamplerState* samplers[] = { states->PointWrap(), states->LinearWrap() };
+			context->PSSetSamplers(0, 2, samplers);
+
+			// シェーダーの設定
+			context->VSSetShader(m_VS.Get(), nullptr, 0);
+			context->PSSetShader(m_PS.Get(), nullptr, 0);
 		}
 	);
 
-	m_spriteBatch->Begin();
+	world = SimpleMath::Matrix::CreateTranslation(0.0f, 1.0f, 0.0f);
 
-	m_spriteBatch->Draw(srv, SimpleMath::Vector2::Zero);
+	// トーラスの描画
+	m_torusModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
+		{
+		}
+	);
 
-	m_spriteBatch->End();
+	// リソースの割り当てを解除する（shadowMapRT）
+	ID3D11ShaderResourceView* nullsrv[] = { nullptr };
+	context->PSSetShaderResources(1, 1, nullsrv);
+
+	//m_spriteBatch->Begin();
+
+	//m_spriteBatch->Draw(srv, SimpleMath::Vector2::Zero);
+
+	//m_spriteBatch->End();
 }
 
 void ModelSampleScene::Finalize()
@@ -193,6 +239,27 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	std::vector<uint8_t> ps_depth = DX::ReadData(L"Resources/Shaders/SM_PS_Depth.cso");
 	DX::ThrowIfFailed(
 		device->CreatePixelShader(ps_depth.data(), ps_depth.size(), nullptr, m_PS_Depth.ReleaseAndGetAddressOf())
+	);
+
+	// 定数バッファの作成
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.ByteWidth = static_cast<UINT>(sizeof(ConstantBuffer));	// 確保するサイズ（16の倍数で設定する）
+	// GPU (読み取り専用) と CPU (書き込み専用) の両方からアクセスできるリソース
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPUが内容を変更できるようにする
+	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+
+	// 頂点シェーダーの作成（シャドウマップ用）
+	std::vector<uint8_t> vs = DX::ReadData(L"Resources/Shaders/SM_VS.cso");
+	DX::ThrowIfFailed(
+		device->CreateVertexShader(vs.data(), vs.size(), nullptr, m_VS.ReleaseAndGetAddressOf())
+	);
+
+	// ピクセルシェーダーの作成（シャドウマップ用）
+	std::vector<uint8_t> ps = DX::ReadData(L"Resources/Shaders/SM_PS.cso");
+	DX::ThrowIfFailed(
+		device->CreatePixelShader(ps.data(), ps.size(), nullptr, m_PS.ReleaseAndGetAddressOf())
 	);
 
 }

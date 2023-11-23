@@ -109,5 +109,24 @@ private:
 	// ライトの回転
 	DirectX::SimpleMath::Quaternion m_lightRotate;
 
+private:
+
+	// 定数バッファの構造体
+	struct ConstantBuffer
+	{
+		DirectX::XMMATRIX lightViewProj;	// ライトの投影空間へ座標変換する行列
+		DirectX::XMVECTOR lightPosition;	// ライトの位置
+		DirectX::XMVECTOR lightAmbient;		// ライトの環境光
+	};
+
+	// 定数バッファへのポインタ
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+
+	// 頂点シェーダー
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_VS;
+
+	// ピクセルシェーダー
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS;
+
 };
 
