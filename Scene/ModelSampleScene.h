@@ -128,5 +128,11 @@ private:
 	// ピクセルシェーダー
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS;
 
+	// トーラスの位置
+	DirectX::SimpleMath::Vector3 m_torusPosition;
+
+	// サンプラー
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_shadowMapSampler;
+
 };
 
