@@ -29,6 +29,12 @@ cbuffer Parameters : register(b1)
 {
     float4x4 LightViewProj  : packoffset(c0);
     float4 LightPos         : packoffset(c4);
-    float3 LightAmbient     : packoffset(c5);
+    float3 LightDir         : packoffset(c5);
+    float3 LightAmbient     : packoffset(c6);
 };
 
+// 追加する定数バッファ（頻繁に更新されないもの）
+cbuffer Parameters : register(b2)
+{
+    float fCosTheta : packoffset(c0);
+};

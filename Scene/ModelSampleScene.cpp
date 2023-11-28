@@ -8,6 +8,9 @@ using namespace DirectX;
 
 ModelSampleScene::ModelSampleScene()
 {
+	// スポットライトの範囲の角度
+	m_lightTheta = 90.0f;
+
 	// ライトの位置
 	m_lightPosition = SimpleMath::Vector3(5.0f, 5.0f, 0.0f);
 
@@ -21,9 +24,16 @@ void ModelSampleScene::Initialize()
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 
+	auto context = GetUserResources()->GetDeviceResources()->GetD3DDeviceContext();
+
 	// デバッグカメラの作成
 	RECT rect = GetUserResources()->GetDeviceResources()->GetOutputSize();
 	m_debugCamera = std::make_unique<Imase::DebugCamera>(rect.right, rect.bottom);
+
+	// 定数バッファの内容更新
+	ConstantBuffer2 cb = {};
+	cb.fCosTheta = cosf(XMConvertToRadians(m_lightTheta / 2.0f));
+	context->UpdateSubresource(m_constantBuffer2.Get(), 0, nullptr, &cb, 0, 0);
 }
 
 void ModelSampleScene::Update(float elapsedTime)
@@ -41,6 +51,32 @@ void ModelSampleScene::Update(float elapsedTime)
 	// トーラスを上下させる
 	auto t = GetUserResources()->GetStepTimer()->GetTotalSeconds();
 	m_torusPosition = SimpleMath::Vector3(1.0f, sinf(t) + 1.0f, 0.0f);
+
+	// スペースキーでマウスのモードを切り替える
+	if (kbTracker->pressed.Space)
+	{
+		if (mouseState.positionMode == Mouse::Mode::MODE_ABSOLUTE)
+		{
+			Mouse::Get().SetMode(Mouse::Mode::MODE_RELATIVE);
+		}
+		else
+		{
+			Mouse::Get().SetMode(Mouse::Mode::MODE_ABSOLUTE);
+		}
+	}
+
+	// マウスのモードが相対モードか？
+	if (mouseState.positionMode == Mouse::Mode::MODE_RELATIVE)
+	{
+		// マウスの右ボタンが押されていたらスポットライトを回転させる
+		if (mouseState.rightButton)
+		{
+			float yaw = -mouseState.x * 0.01f;
+			float pitch = mouseState.y * 0.01f;
+			SimpleMath::Quaternion q = SimpleMath::Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
+			m_lightRotate = q * m_lightRotate;
+		}
+	}
 
 }
 
@@ -87,7 +123,7 @@ void ModelSampleScene::Render()
 
 	// 射影行列を作成
 	SimpleMath::Matrix proj = SimpleMath::Matrix::CreatePerspectiveFieldOfView(
-		XMConvertToRadians(90.0f), 1.0f, 0.1f, 100.0f);
+		XMConvertToRadians(m_lightTheta), 1.0f, 0.1f, 100.0f);
 
 	// -------------------------------------------------------------------------- //
 	// 定数バッファを更新
@@ -103,6 +139,7 @@ void ModelSampleScene::Render()
 	SimpleMath::Matrix m = view * proj;
 	cb.lightViewProj = XMMatrixTranspose(m);
 	cb.lightPosition = m_lightPosition;
+	cb.lightDirection = lightDir;
 	cb.lightAmbient = SimpleMath::Color(0.3f, 0.3f, 0.3f);
 
 	*static_cast<ConstantBuffer*>(mappedResource.pData) = cb;
@@ -154,9 +191,9 @@ void ModelSampleScene::Render()
 	m_floorModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
 		{
 			// 定数バッファの設定
-			ID3D11Buffer* cbuf[] = { m_constantBuffer.Get() };
+			ID3D11Buffer* cbuf[] = { m_constantBuffer.Get(), m_constantBuffer2.Get() };
 			context->VSSetConstantBuffers(1, 1, cbuf);
-			context->PSSetConstantBuffers(1, 1, cbuf);
+			context->PSSetConstantBuffers(1, 2, cbuf);
 
 			// 作成したシャドウマップをリソースとして設定
 			context->PSSetShaderResources(1, 1, &srv);
@@ -177,9 +214,9 @@ void ModelSampleScene::Render()
 	m_torusModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
 		{
 			// 定数バッファの設定
-			ID3D11Buffer* cbuf[] = { m_constantBuffer.Get() };
+			ID3D11Buffer* cbuf[] = { m_constantBuffer.Get(), m_constantBuffer2.Get() };
 			context->VSSetConstantBuffers(1, 1, cbuf);
-			context->PSSetConstantBuffers(1, 1, cbuf);
+			context->PSSetConstantBuffers(1, 2, cbuf);
 
 			// 作成したシャドウマップをリソースとして設定
 			context->PSSetShaderResources(1, 1, &srv);
@@ -200,9 +237,9 @@ void ModelSampleScene::Render()
 	m_torusModel->Draw(context, *states, world, m_view, m_proj, false, [&]()
 		{
 			// 定数バッファの設定
-			ID3D11Buffer* cbuf[] = { m_constantBuffer.Get() };
+			ID3D11Buffer* cbuf[] = { m_constantBuffer.Get(), m_constantBuffer2.Get() };
 			context->VSSetConstantBuffers(1, 1, cbuf);
-			context->PSSetConstantBuffers(1, 1, cbuf);
+			context->PSSetConstantBuffers(1, 2, cbuf);
 
 			// 作成したシャドウマップをリソースとして設定
 			context->PSSetShaderResources(1, 1, &srv);
@@ -220,6 +257,11 @@ void ModelSampleScene::Render()
 	// リソースの割り当てを解除する（shadowMapRT）
 	ID3D11ShaderResourceView* nullsrv[] = { nullptr };
 	context->PSSetShaderResources(1, 1, nullsrv);
+
+	world = SimpleMath::Matrix::CreateFromQuaternion(m_lightRotate) * SimpleMath::Matrix::CreateTranslation(m_lightPosition);
+
+	// スポットライトの描画
+	m_spotLightModel->Draw(context, *states, world, m_view, m_proj);
 
 	//m_spriteBatch->Begin();
 
@@ -253,6 +295,20 @@ void ModelSampleScene::CreateDeviceDependentResources()
 
 	// トーラスモデルの作成
 	m_torusModel = Model::CreateFromCMO(device, L"Resources/Models/Torus.cmo", fx);
+
+	// スポットライトのモデルの作成
+	m_spotLightModel = Model::CreateFromCMO(device, L"Resources/Models/SpotLight.cmo", fx);
+
+	// 自己発光するようにエフェクトを設定する
+	m_spotLightModel->UpdateEffects([&](IEffect* effect)
+		{
+			auto basicEffect = dynamic_cast<BasicEffect*>(effect);
+			if (basicEffect)
+			{
+				basicEffect->SetEmissiveColor(Colors::White);
+			}
+		}
+	);
 
 	//// ピクセルシェーダーの作成（トーラス用）
 	//std::vector<uint8_t> ps_torus = DX::ReadData(L"Resources/Shaders/PS_Test.cso");
@@ -304,6 +360,13 @@ void ModelSampleScene::CreateDeviceDependentResources()
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// CPUが内容を変更できるようにする
 	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+
+	// 定数バッファの作成
+	bufferDesc.ByteWidth = static_cast<UINT>(sizeof(ConstantBuffer2));	// 確保するサイズ（16の倍数で設定する）
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;	// GPUの読み取りと書き込みが可能な一般的なリソース
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 定数バッファとして扱う
+	bufferDesc.CPUAccessFlags = 0;	// CPUはアクセスしないので0
+	DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer2.ReleaseAndGetAddressOf()));
 
 	// 頂点シェーダーの作成（シャドウマップ用）
 	std::vector<uint8_t> vs = DX::ReadData(L"Resources/Shaders/SM_VS.cso");

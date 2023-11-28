@@ -116,11 +116,22 @@ private:
 	{
 		DirectX::XMMATRIX lightViewProj;	// ライトの投影空間へ座標変換する行列
 		DirectX::XMVECTOR lightPosition;	// ライトの位置
+		DirectX::XMVECTOR lightDirection;	// ライトの方向
 		DirectX::XMVECTOR lightAmbient;		// ライトの環境光
 	};
 
 	// 定数バッファへのポインタ
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+
+	// 定数バッファの構造体（頻繁に更新されない物）
+	struct ConstantBuffer2
+	{
+		float fCosTheta;		// スポットライトのfov/2
+		float pad[3];
+	};
+
+	// 定数バッファへのポインタ
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer2;
 
 	// 頂点シェーダー
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_VS;
@@ -133,6 +144,12 @@ private:
 
 	// サンプラー
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_shadowMapSampler;
+
+	// スポットライトのモデルへのポインタ
+	std::unique_ptr<DirectX::Model> m_spotLightModel;
+
+	// スポットライトの範囲の角度
+	float m_lightTheta;
 
 };
 

@@ -242,6 +242,9 @@
     <MeshContentTask Include="FBX\Torus.fbx">
       <Filter>FBX</Filter>
     </MeshContentTask>
+    <MeshContentTask Include="FBX\SpotLight.fbx">
+      <Filter>FBX</Filter>
+    </MeshContentTask>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
