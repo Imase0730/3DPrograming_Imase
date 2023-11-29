@@ -20,6 +20,7 @@ struct Input
 float4 main(Input pin) : SV_TARGET0
 {
     float4 diffuse;
+    float3 specular = 0;
 
     // ライトの向きを求める
     float3 lightDir = normalize(pin.PositionWS.xyz - LightPos.xyz);
@@ -66,10 +67,7 @@ float4 main(Input pin) : SV_TARGET0
         float dotH = saturate(dot(halfVector, worldNormal));
 
         // スペキュラパワーを指数として使いハイライトのかかり具合を調整
-        float3 specular = pow(dotH, SpecularPower) * dotL * SpecularColor * percentLit;
-
-        // スペキュラを加える
-        diffuse.rgb += specular * diffuse.a;
+        specular = pow(dotH, SpecularPower) * dotL * SpecularColor * percentLit;
     }
     else
     {
@@ -77,9 +75,12 @@ float4 main(Input pin) : SV_TARGET0
         diffuse = float4(LightAmbient, 1.0f) * DiffuseColor;
     }
   
-    // テクスチャ色を掛ける 
+    // テクスチャ色とディフューズ色を掛ける 
     float4 color = Texture.Sample(Sampler, pin.TexCoord) * diffuse;
-    
+
+    // スペキュラを加える
+    color.rgb += specular * diffuse.a;
+
     return color;
 }
 
