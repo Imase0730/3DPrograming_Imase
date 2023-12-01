@@ -103,6 +103,7 @@
     <ClInclude Include="ImaseLib\DepthStencil.h">
       <Filter>ImaseLib</Filter>
     </ClInclude>
+    <ClInclude Include="TransitionMask.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="ImaseLib\DepthStencil.cpp">
       <Filter>ImaseLib</Filter>
     </ClCompile>
+    <ClCompile Include="TransitionMask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

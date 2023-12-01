@@ -9,7 +9,7 @@ using namespace DirectX;
 ModelSampleScene::ModelSampleScene()
 {
 	// スポットライトの範囲の角度
-	m_lightTheta = 90.0f;
+	m_lightTheta = 45.0f;
 
 	// ライトの位置
 	m_lightPosition = SimpleMath::Vector3(5.0f, 5.0f, 0.0f);
@@ -179,7 +179,7 @@ void ModelSampleScene::Render()
 	auto renderTarget = GetUserResources()->GetDeviceResources()->GetRenderTargetView();
 	auto depthStencil = GetUserResources()->GetDeviceResources()->GetDepthStencilView();
 
-	context->ClearRenderTargetView(renderTarget, Colors::CornflowerBlue);
+	context->ClearRenderTargetView(renderTarget, Colors::Black);
 	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 	auto const viewport = GetUserResources()->GetDeviceResources()->GetScreenViewport();

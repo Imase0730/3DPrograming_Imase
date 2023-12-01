@@ -121,6 +121,17 @@ void SpriteSampleScene::CreateDeviceDependentResources()
 	DX::ThrowIfFailed(
 		CreateDDSTextureFromFile(device, L"Resources/Textures/number.dds", nullptr, m_numberSRV.ReleaseAndGetAddressOf())
 	);
+
+	// ÉJÅ[ÉhÇÃäGÇÃì«Ç›çûÇ›
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_01.dds", nullptr, m_cardSRV[0].ReleaseAndGetAddressOf())
+	);
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_02.dds", nullptr, m_cardSRV[1].ReleaseAndGetAddressOf())
+	);
+	DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(device, L"Resources/Textures/card_heart_03.dds", nullptr, m_cardSRV[2].ReleaseAndGetAddressOf())
+	);
 }
 
 void SpriteSampleScene::CreateWindowSizeDependentResources()

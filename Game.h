@@ -9,6 +9,7 @@
 #include "ImaseLib/DebugFont.h"
 #include "ImaseLib/SceneManager.h"
 #include "UserResources.h"
+#include "RenderTexture.h"
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -95,5 +96,10 @@ public:
         m_deviceResources->GetSwapChain()->SetFullscreenState(m_fullscreen, nullptr);
         if (value) m_deviceResources->CreateWindowSizeDependentResources();
     }
+
+private:
+ 
+    // レンダリングテクスチャ
+    std::unique_ptr<DX::RenderTexture> m_transitionTexture;
 
 };

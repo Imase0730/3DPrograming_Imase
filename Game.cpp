@@ -24,6 +24,9 @@ Game::Game() noexcept(false)
     //   Add DX::DeviceResources::c_AllowTearing to opt-in to variable rate displays.
     //   Add DX::DeviceResources::c_EnableHDR for HDR10 display.
     m_deviceResources->RegisterDeviceNotify(this);
+
+    // レンダリングテクスチャの作成
+    m_transitionTexture = std::make_unique<DX::RenderTexture>(m_deviceResources->GetBackBufferFormat());
 }
 
 // Initialize the Direct3D resources required to run.
@@ -47,6 +50,9 @@ void Game::Initialize(HWND window, int width, int height)
     // 起動シーン設定
     m_sceneManager->SetScene<ModelSampleScene>();
 
+    // BLANK（黒で塗りつぶす）
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    context->ClearRenderTargetView(m_transitionTexture->GetRenderTargetView(), Colors::Black);
 }
 
 #pragma region Frame Update
@@ -232,6 +238,9 @@ void Game::CreateDeviceDependentResources()
 
     // 実行中のシーンのCreateDeviceDependentResources関数を呼び出す
     m_sceneManager->CreateDeviceDependentResources();
+ 
+    // レンダリングテクスチャにデバイスを設定する
+    m_transitionTexture->SetDevice(device);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -241,6 +250,10 @@ void Game::CreateWindowSizeDependentResources()
 
     // 実行中のシーンのCreateWindowSizeDependentResources関数を呼び出す
     m_sceneManager->CreateWindowSizeDependentResources();
+ 
+    // レンダリングテクスチャのサイズを変更
+    auto size = m_deviceResources->GetOutputSize();
+    m_transitionTexture->SetWindow(size);
 }
 
 void Game::OnDeviceLost()
@@ -249,6 +262,9 @@ void Game::OnDeviceLost()
 
     // 実行中のシーンのOnDeviceLost関数を呼び出す
     m_sceneManager->OnDeviceLost();
+
+    // レンダリングテクスチャの解放
+    m_transitionTexture->ReleaseDevice();
 }
 
 void Game::OnDeviceRestored()

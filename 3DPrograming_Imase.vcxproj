@@ -216,6 +216,7 @@
     <ClInclude Include="SpriteSheet.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="Task\Number.h" />
+    <ClInclude Include="TransitionMask.h" />
     <ClInclude Include="UserResources.h" />
   </ItemGroup>
   <ItemGroup>
@@ -254,6 +255,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Task\Number.cpp" />
+    <ClCompile Include="TransitionMask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
