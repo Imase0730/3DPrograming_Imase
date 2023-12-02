@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "TransitionMask.h"
 #include "ReadData.h"
+#include "CommonSys.h"
 
 using namespace DirectX;
 
@@ -29,16 +30,18 @@ TransitionMask::TransitionMask(
 // 更新処理
 void TransitionMask::Update(float elapsedTime)
 {
+	UNREFERENCED_PARAMETER(elapsedTime);
+
 	if (m_open)
 	{
 		// オープン
-		m_rate -= elapsedTime / m_interval;
+		m_rate -= FRAME_TIME / m_interval;
 		if (m_rate < 0.0f) m_rate = 0.0f;
 	}
 	else
 	{
 		// クローズ
-		m_rate += elapsedTime / m_interval;
+		m_rate += FRAME_TIME / m_interval;
 		if (m_rate > 1.0f) m_rate = 1.0f;
 	}
 }

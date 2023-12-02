@@ -104,6 +104,7 @@
       <Filter>ImaseLib</Filter>
     </ClInclude>
     <ClInclude Include="TransitionMask.h" />
+    <ClInclude Include="CommonSys.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
