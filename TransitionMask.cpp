@@ -22,6 +22,7 @@ TransitionMask::TransitionMask(
 	: m_interval(interval)
 	, m_rate(0.0f)
 	, m_open(true)
+	, m_request(CreateMaskRequest::NONE)
 {
 	// スプライトバッチの作成
 	m_spriteBatch = std::make_unique<SpriteBatch>(context);
@@ -54,10 +55,11 @@ void TransitionMask::Draw(
 	const RECT& rect
 )
 {
-	m_spriteBatch->Begin();
+	if (m_rate == 0.0f) return;
 
-	// マスクの描画
-	m_spriteBatch->Draw(texture, rect);
+	m_spriteBatch->Begin(SpriteSortMode_Immediate, states->NonPremultiplied());
+
+	m_spriteBatch->Draw(texture, rect, SimpleMath::Color(1.0f, 1.0f, 1.0f, m_rate));
 
 	m_spriteBatch->End();
 }
@@ -76,16 +78,16 @@ void TransitionMask::Close()
 	m_rate = 0.0f;
 }
 
-// オープンしているかチェックする関数
-bool TransitionMask::IsOpen()
-{
-	if (m_open && m_rate == 0.0f) return true;
-	return false;
-}
-
-// クローズしているかチェックする関数
-bool TransitionMask::IsClose()
-{
-	if (!m_open && m_rate == 1.0f) return true;
-	return false;
-}
+//// オープンしているかチェックする関数
+//bool TransitionMask::IsOpen() const
+//{
+//	if (m_open && m_rate == 0.0f) return true;
+//	return false;
+//}
+//
+//// クローズしているかチェックする関数
+//bool TransitionMask::IsClose() const
+//{
+//	if (!m_open && m_rate == 1.0f) return true;
+//	return false;
+//}

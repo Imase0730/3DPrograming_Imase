@@ -82,6 +82,9 @@ void Game::Update(DX::StepTimer const& timer)
 
     // シーンの更新
     m_sceneManager->Update(elapsedTime);
+
+    // 画面遷移マスクの更新
+    m_transitionMask->Update(elapsedTime);
 }
 #pragma endregion
 
@@ -105,6 +108,18 @@ void Game::Render()
 
     // シーンの描画
     m_sceneManager->Render();
+
+    // フレームバッファのコピーリクエストがあるなら
+    if (m_transitionMask->GetCreateMaskRequest() == TransitionMask::CreateMaskRequest::COPY)
+    {
+        // COPY（現在のフレームバッファをマスクに設定する）
+        auto renderTarget = m_deviceResources->GetRenderTarget();
+        context->CopyResource(m_transitionTexture->GetRenderTarget(), renderTarget);
+        m_transitionMask->SetCreateMaskRequest(TransitionMask::CreateMaskRequest::NONE);
+    }
+
+    // 画面遷移マスクの描画
+    m_transitionMask->Draw(context, m_states.get(), m_transitionTexture->GetShaderResourceView(), m_deviceResources->GetOutputSize());
 
     // fpsの表示
     std::wostringstream oss;
@@ -228,6 +243,9 @@ void Game::CreateDeviceDependentResources()
     // シーンマネージャーの作成
     if (!m_sceneManager) m_sceneManager = std::make_unique<Imase::SceneManager<UserResources>>(m_userResources.get());
 
+    // 画面遷移マスクの作成
+    m_transitionMask = std::make_unique<TransitionMask>(device, context);
+
     // シーンへ渡すユーザーリソースの設定（ここで設定してください）
     m_userResources->SetDeviceResources(m_deviceResources.get());
     m_userResources->SetCommonStates(m_states.get());
@@ -235,6 +253,7 @@ void Game::CreateDeviceDependentResources()
     m_userResources->SetKeyboardStateTracker(&m_keyboardTracker);
     m_userResources->SetMouseStateTracker(&m_mouseTracker);
     m_userResources->SetStepTimerStates(&m_timer);
+    m_userResources->SetTransitionMask(m_transitionMask.get());
 
     // 実行中のシーンのCreateDeviceDependentResources関数を呼び出す
     m_sceneManager->CreateDeviceDependentResources();

@@ -10,6 +10,7 @@
 #include "ImaseLib/SceneManager.h"
 #include "UserResources.h"
 #include "RenderTexture.h"
+#include "TransitionMask.h"
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -102,4 +103,6 @@ private:
     // レンダリングテクスチャ
     std::unique_ptr<DX::RenderTexture> m_transitionTexture;
 
+    // 画面遷移マスク
+    std::unique_ptr<TransitionMask> m_transitionMask;
 };

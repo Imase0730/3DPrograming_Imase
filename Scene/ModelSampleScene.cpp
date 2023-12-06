@@ -3,6 +3,7 @@
 #include "DebugDraw.h"
 #include "ReadData.h"
 #include <iomanip>
+#include "SpriteSampleScene.h"
 
 using namespace DirectX;
 
@@ -78,6 +79,27 @@ void ModelSampleScene::Update(float elapsedTime)
 		}
 	}
 
+	// 次のシーンへ
+	auto transitionMask = GetUserResources()->GetTransitionMask();
+
+	// オープンしていてEnterキーが押された
+	if (kbTracker->pressed.Enter)
+	{
+		transitionMask->SetCreateMaskRequest(TransitionMask::CreateMaskRequest::COPY);
+		ChangeScene<SpriteSampleScene>();
+	}
+
+	//// オープンしていてEnterキーが押された
+	//if (transitionMask->IsOpen() && kbTracker->pressed.Enter)
+	//{
+	//	// クローズする
+	//	transitionMask->Close();
+	//}
+	//// クローズしたら別のシーンへ
+	//if (transitionMask->IsClose() && transitionMask->IsEnd())
+	//{
+	//	ChangeScene<SpriteSampleScene>();
+	//}
 }
 
 void ModelSampleScene::Render()

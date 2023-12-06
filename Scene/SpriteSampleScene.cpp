@@ -25,6 +25,9 @@ void SpriteSampleScene::Initialize()
 	m_number = m_taskManager.AddTask<Number>(&m_spriteBatch, m_numberSRV.GetAddressOf());
 	m_number->SetNumber(12345678);
 	m_number->SetPosition(SimpleMath::Vector2(400.0f, 300.0f));
+
+	auto transitionMask = GetUserResources()->GetTransitionMask();
+	transitionMask->Open();
 }
 
 void SpriteSampleScene::Update(float elapsedTime)
