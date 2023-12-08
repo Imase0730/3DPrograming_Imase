@@ -195,6 +195,9 @@
     <ImageContentTask Include="Textures\Shadow.png">
       <Filter>Textures</Filter>
     </ImageContentTask>
+    <ImageContentTask Include="Textures\FadeMask.png">
+      <Filter>Textures</Filter>
+    </ImageContentTask>
   </ItemGroup>
   <ItemGroup>
     <MeshContentTask Include="FBX\Dice.fbx">
@@ -275,6 +278,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\SM_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PS_Fade.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

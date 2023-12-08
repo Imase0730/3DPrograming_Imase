@@ -35,6 +35,22 @@ private:
 	// 作成リクエスト
 	CreateMaskRequest m_request;
 
+	// ピクセルシェーダー
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PS_Fade;
+
+	// 定数バッファの構造体
+	struct ConstantBuffer
+	{
+		float rate;		// 割合（0～1）
+		float pad[3];
+	};
+
+	// 定数バッファへのポインタ
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+
+	// マスク用テクスチャ
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_maskTexture;
+
 public:
 
 	// コンストラクタ
