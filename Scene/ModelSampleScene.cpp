@@ -83,23 +83,23 @@ void ModelSampleScene::Update(float elapsedTime)
 	auto transitionMask = GetUserResources()->GetTransitionMask();
 
 	// オープンしていてEnterキーが押された
-	//if (kbTracker->pressed.Enter)
-	//{
-	//	transitionMask->SetCreateMaskRequest(TransitionMask::CreateMaskRequest::COPY);
-	//	ChangeScene<SpriteSampleScene>();
-	//}
-
-	// オープンしていてEnterキーが押された
-	if (transitionMask->IsOpen() && kbTracker->pressed.Enter)
+	if (kbTracker->pressed.Enter)
 	{
-		// クローズする
-		transitionMask->Close();
-	}
-	// クローズしたら別のシーンへ
-	if (transitionMask->IsClose() && transitionMask->IsEnd())
-	{
+		transitionMask->SetCreateMaskRequest(TransitionMask::CreateMaskRequest::COPY);
 		ChangeScene<SpriteSampleScene>();
 	}
+
+	//// オープンしていてEnterキーが押された
+	//if (transitionMask->IsOpen() && kbTracker->pressed.Enter)
+	//{
+	//	// クローズする
+	//	transitionMask->Close();
+	//}
+	//// クローズしたら別のシーンへ
+	//if (transitionMask->IsClose() && transitionMask->IsEnd())
+	//{
+	//	ChangeScene<SpriteSampleScene>();
+	//}
 }
 
 void ModelSampleScene::Render()
