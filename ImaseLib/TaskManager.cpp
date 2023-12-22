@@ -47,6 +47,9 @@ void Task::ChangeParent(Task* parent)
 // 更新関数
 void TaskManager::Update(float elapsedTime)
 {
+	// 描画順序管理テーブルクリア
+	m_ot.clear();
+
 	// ルートタスクから子供タスクに向かって再起的に更新処理を実行する
 	ChildTaskUpdate(m_rootTask, elapsedTime);
 
@@ -55,7 +58,7 @@ void TaskManager::Update(float elapsedTime)
 }
 
 // 描画関数
-void TaskManager::Render(bool clear)
+void TaskManager::Render()
 {
 	// 描画順序管理テーブルに従ってタスクの描画関数を呼び出す
 	for (auto it = m_ot.begin(); it != m_ot.end(); it++)
@@ -65,9 +68,6 @@ void TaskManager::Render(bool clear)
 
 		if (!(*it)->IsKill() && (*it)->IsActive()) (*it)->Render();
 	}
-
-	// 描画順序管理テーブルクリア
-	if (clear) m_ot.clear();
 
 	// 実行中のタスクをルートタスクに設定
 	m_currentTask = m_rootTask;

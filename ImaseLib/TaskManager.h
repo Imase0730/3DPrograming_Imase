@@ -113,13 +113,13 @@ namespace Imase
 		void SetActive(bool flag) { m_active = flag; }
 
 		// アクティブチェック関数
-		bool IsActive() { return m_active; }
+		bool IsActive() const { return m_active; }
 
 		// 描画順設定関数（otの値が0が一番手前）
 		void SetOt(int ot) { this->m_ot = ot; }
 
 		// 描画順の取得関数
-		int GetOt() { return m_ot; }
+		int GetOt() const { return m_ot; }
 
 		// 指定したタスクの子供にする変更する関数
 		void ChangeParent(Task* parent);
@@ -145,7 +145,7 @@ namespace Imase
 		void Kill() { m_killFlag = true; }
 
 		// タスク消去チェック関数
-		bool IsKill() { return m_killFlag; }
+		bool IsKill() const { return m_killFlag; }
 
 	};
 
@@ -207,7 +207,7 @@ namespace Imase
 		virtual void Update(float elapsedTime);
 
 		// 描画関数
-		virtual void Render(bool clear = true);
+		virtual void Render();
 
 		// タスクの生成関数
 		template <class T, class... Args>
